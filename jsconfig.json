@@ -8,7 +8,8 @@
         "experimentalDecorators": false,
         "strictNullChecks": true,
         "strictFunctionTypes": true,
-        "strict": true
+        "strict": true,
+        "types": ["node"]
     },
     "exclude": [
         "node_modules",

@@ -494,6 +494,7 @@ function formatearMoneda(moneda) {
  * @returns {string[]} Códigos de clientes recurrentes (sin duplicados).
  */
 function clientesRecurrentes(ventas) {
+  /** @type {string[]} */
   const recurrentes = [];
 
   for (let i = 0; i < ventas.length; i++) {

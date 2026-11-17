@@ -226,14 +226,15 @@ const rutaReporte = path.join(__dirname, "reporte.js");
 const salida = execFileSync(process.execPath, [rutaReporte], { encoding: "utf8" });
 
 const bloqueCiudad = salida.split("2. VENTAS POR CIUDAD")[1].split("3. UNIDADES POR PRODUCTO")[0];
+/** @type {string[]} */
 const ciudadesEnTabla = bloqueCiudad
   .split("\n")
-  .filter((linea) => linea.includes("│"))
-  .map((linea) => {
+  .filter((/** @type {string} */ linea) => linea.includes("│"))
+  .map((/** @type {string} */ linea) => {
     const coincidencia = /│\s*'([^']*)'\s*│/.exec(linea);
     return coincidencia ? coincidencia[1] : null;
   })
-  .filter(Boolean);
+  .filter((/** @type {string | null} */ ciudad) => ciudad !== null);
 
 const ciudadesUnicas = new Set(ciudadesEnTabla);
 const hayNaN = salida.includes("NaN");
