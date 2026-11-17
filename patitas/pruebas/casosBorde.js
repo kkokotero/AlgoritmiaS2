@@ -3,7 +3,8 @@
  * Ejecutar desde `patitas/`: `node pruebas/casosBorde.js`
  */
 
-const assert = require("node:assert");
+// @ts-ignore: módulo built-in de Node.js
+const assert = require("assert");
 const ListaEnlazada = require("../src/ListaEnlazada");
 
 /**
@@ -46,11 +47,13 @@ function verificarEstado(lista, esperado, etiqueta) {
   } else {
     assert.ok(lista.cabeza, `${etiqueta}: cabeza existe`);
     assert.ok(lista.cola, `${etiqueta}: cola existe`);
-    assert.strictEqual(lista.cabeza.dato.fecha, esperado[0], `${etiqueta}: cabeza`);
-    assert.strictEqual(lista.cola.dato.fecha, esperado[esperado.length - 1], `${etiqueta}: cola`);
-    assert.strictEqual(lista.cola.siguiente, null, `${etiqueta}: cola.siguiente null`);
+    const cabeza = /** @type {import("../src/Nodo")} */ (lista.cabeza);
+    const cola = /** @type {import("../src/Nodo")} */ (lista.cola);
+    assert.strictEqual(cabeza.dato.fecha, esperado[0], `${etiqueta}: cabeza`);
+    assert.strictEqual(cola.dato.fecha, esperado[esperado.length - 1], `${etiqueta}: cola`);
+    assert.strictEqual(cola.siguiente, null, `${etiqueta}: cola.siguiente null`);
     if (esperado.length === 1) {
-      assert.strictEqual(lista.cabeza, lista.cola, `${etiqueta}: unico nodo`);
+      assert.strictEqual(cabeza, cola, `${etiqueta}: unico nodo`);
     }
   }
   console.log(`OK - ${etiqueta}`);
@@ -77,7 +80,7 @@ const porFecha = (f) => (d) => d.fecha === f;
   lista.agregarAlFinal(at("A"));
   const res = lista.eliminar(porFecha("A"));
   assert.ok(res, "único: devuelve dato");
-  assert.strictEqual(res.fecha, "A", "único: dato eliminado");
+  assert.strictEqual((/** @type {Atencion} */ (res)).fecha, "A", "único: dato eliminado");
   verificarEstado(lista, [], "2. Eliminar el único nodo");
 }
 
@@ -87,7 +90,7 @@ const porFecha = (f) => (d) => d.fecha === f;
   ["A", "B", "C"].forEach((f) => lista.agregarAlFinal(at(f)));
   const res = lista.eliminar(porFecha("A"));
   assert.ok(res, "cabeza: devuelve dato");
-  assert.strictEqual(res.fecha, "A");
+  assert.strictEqual((/** @type {Atencion} */ (res)).fecha, "A");
   verificarEstado(lista, ["B", "C"], "3. Eliminar la cabeza");
 }
 
@@ -97,7 +100,7 @@ const porFecha = (f) => (d) => d.fecha === f;
   ["A", "B", "C"].forEach((f) => lista.agregarAlFinal(at(f)));
   const res = lista.eliminar(porFecha("C"));
   assert.ok(res, "cola: devuelve dato");
-  assert.strictEqual(res.fecha, "C");
+  assert.strictEqual((/** @type {Atencion} */ (res)).fecha, "C");
   verificarEstado(lista, ["A", "B"], "4. Eliminar la cola (nueva cola.siguiente null)");
 }
 
@@ -125,7 +128,7 @@ const porFecha = (f) => (d) => d.fecha === f;
   ["A", "C"].forEach((f) => lista.agregarAlFinal(at(f)));
   const encontrada = lista.buscar(porFecha("A"));
   assert.ok(encontrada, "buscar: encontrada");
-  assert.strictEqual(encontrada.fecha, "A");
+  assert.strictEqual((/** @type {Atencion} */ (encontrada)).fecha, "A");
   assert.strictEqual(lista.buscar(porFecha("Z")), null);
   assert.strictEqual(lista.insertarDespuesDe(porFecha("Z"), at("X")), false);
   lista.insertarDespuesDe(porFecha("A"), at("B"));

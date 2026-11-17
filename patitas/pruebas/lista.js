@@ -3,7 +3,8 @@
  * Ejecutar desde `patitas/`: `node pruebas/lista.js`
  */
 
-const assert = require("node:assert");
+// @ts-ignore: módulo built-in de Node.js
+const assert = require("assert");
 const ListaEnlazada = require("../src/ListaEnlazada");
 
 /**
@@ -42,10 +43,12 @@ function verificar(lista, esperadoCabeza, esperadoCola, esperadoTamanio, esperad
     assert.ok(lista.cola, `${etiqueta}: cola existe`);
     assert.ok(esperadoCabeza, `${etiqueta}: esperadoCabeza definido`);
     assert.ok(esperadoCola, `${etiqueta}: esperadoCola definido`);
-    assert.strictEqual(lista.cabeza.dato.fecha, esperadoCabeza, `${etiqueta}: cabeza dato`);
-    assert.strictEqual(lista.cola.dato.fecha, esperadoCola, `${etiqueta}: cola dato`);
+    const cabeza = /** @type {import("../src/Nodo")} */ (lista.cabeza);
+    const cola = /** @type {import("../src/Nodo")} */ (lista.cola);
+    assert.strictEqual(cabeza.dato.fecha, esperadoCabeza, `${etiqueta}: cabeza dato`);
+    assert.strictEqual(cola.dato.fecha, esperadoCola, `${etiqueta}: cola dato`);
     if (esperadoTamanio === 1) {
-      assert.strictEqual(lista.cabeza, lista.cola, `${etiqueta}: cabeza y cola mismo nodo`);
+      assert.strictEqual(cabeza, cola, `${etiqueta}: cabeza y cola mismo nodo`);
     }
   }
   assert.deepStrictEqual(
