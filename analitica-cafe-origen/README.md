@@ -8,29 +8,35 @@ Motor de analítica y **reporte de negocio por consola** para Café Origen. Inte
 El proyecto procesa un historial de ventas y genera un informe legible en consola: resumen general, ventas por ciudad, unidades y top de productos, clientes recurrentes, producto estrella por ciudad, combo de regalo sugerido (tarjeta $87.000), cliente para cupón (primera compra única) y mejor semana. Puede ejecutarse sobre los **datos reales** del Día 1 o sobre **n ventas generadas** para pruebas de rendimiento.
 
 - **Motor de analítica:** `src/analitica.js` (funciones puras y reutilizables).
-- **Reporte de negocio:** `src/reporte.js` (punto de entrada).
+- **Reporte de negocio:** `src/reporte.js` (punto de entrada, CLI).
 - **Catálogo y análisis comerciales:** `src/catalogo.js`, `src/ventanas.js`, `src/generarVentas.js`.
 
 ## Requisitos
 - Node.js **>= 18**.
-- No hay dependencias de runtime (solo `@types/node` como devDependency para tipado).
+- No hay dependencias de runtime (solo `@types/node` como devDependency para tipado opcional).
 
 ## Cómo ejecutarlo
+Desde la carpeta `analitica-cafe-origen/`:
 
 ```bash
-# (opcional, solo para chequeo de tipos) 
+# (opcional) instalar dependencias de desarrollo para chequeo de tipos
 npm install
 
 # Reporte con datos reales (Día 1)
 node src/reporte.js
+# o
+npm run reporte
 
 # Reporte con n ventas generadas (ej. 100.000)
 node src/reporte.js 100000
+```
 
-# Scripts disponibles
-npm run reporte        # datos reales
+### Scripts disponibles
+```bash
+npm run reporte        # reporte con datos reales
 npm run depuracion     # verificación/depuración de la v0.1
-npm run verificar      # compara versión ciclo vs métodos
+npm run verificar      # compara versión con ciclo vs métodos
+npm run explorar       # exploración de datos
 npm run recurrentes    # verificación y tiempos de clientes recurrentes
 npm run combos         # pruebas de combos y frecuencias
 npm run ventanas       # pruebas de ventana deslizante y dos punteros
@@ -57,7 +63,7 @@ node src/reporte.js 100000
 ## Estructura del proyecto
 
 ```
-.
+analitica-cafe-origen/
 ├── src/
 │   ├── analitica.js           # Motor de analítica (funciones puras)
 │   ├── datos.js               # Historial de ventas real (Día 1)
@@ -65,16 +71,13 @@ node src/reporte.js 100000
 │   ├── ventanas.js            # Mejor semana (ventana deslizante) y par más cercano (dos punteros)
 │   ├── generarVentas.js       # Generador de ventas sintéticas y totales por día
 │   ├── reporte.js             # Reporte v1.0 (CLI: [n] ventas)
-│   ├── medirRendimiento.js    # Comparación v0.1 vs v1.0
+│   ├── medirRendimiento.js    # Comparación de rendimiento v0.1 vs v1.0
 │   ├── clientesRecurrentes.js # Verificación/medición de recurrentes
 │   ├── combosFrecuencias.js   # Pruebas de combos y frecuencias
 │   ├── pruebasVentanas.js     # Pruebas de ventana y dos punteros
 │   ├── depuracion.js          # Reproducción y verificación de errores
 │   ├── verificar.js           # Comparación ciclo vs métodos
 │   └── explorar.js            # Exploración de datos
-├── docs/
-│   ├── semana-1/              # Bitácoras Día 1, 2, 3
-│   └── semana-2/              # Bitácoras Día 1, 2 y cierre de semana
 ├── RENDIMIENTO.md             # Complejidades y comparación v0.1 vs v1.0
 ├── README.md
 ├── package.json
@@ -82,8 +85,8 @@ node src/reporte.js 100000
 ```
 
 ## Documentación y rendimiento
-- **Rendimiento y complejidades:** ver [`RENDIMIENTO.md`](RENDIMIENTO.md).
-- **Bitácoras (proceso, trazas y depuración):** ver [`docs/`](docs/), especialmente [`docs/semana-2/bitacora-cierre.md`](docs/semana-2/bitacora-cierre.md).
+- **Rendimiento y complejidades:** [`RENDIMIENTO.md`](RENDIMIENTO.md).
+- **Bitácoras (proceso, trazas y depuración):** [`../docs/semana-1/`](../docs/semana-1/) (Día 1, Día 2, Día 3) en el repositorio raíz.
 
 ## Decisiones de diseño
 - Funciones puras, sin mutar entradas; resultados deterministas.

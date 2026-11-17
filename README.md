@@ -1,27 +1,31 @@
 # Algoritmia S2
 
-Repositorio de ejercicios y proyectos del curso de Algoritmia (Semana 2). Contiene implementaciones, análisis de complejidad, optimizaciones y bitácoras de trabajo.
+Repositorio de ejercicios y proyectos del curso de Algoritmia. Incluye implementaciones, análisis de complejidad, optimizaciones y bitácoras de trabajo.
 
 ## Proyectos
 
 | Proyecto | Descripción | Ubicación |
 |---|---|---|
-| **Café Origen — Analítica v1.0** | Motor de analítica y reporte por consola (indicadores, clientes recurrentes, frecuencias, combos, ventana deslizante, dos punteros). Optimizado para procesar 100.000 ventas en < 5 s. | [`analitica-cafe-origen/`](analitica-cafe-origen/) |
+| **Café Origen — Analítica v1.0** | Motor de analítica y reporte por consola: indicadores, clientes recurrentes (Set/Map), frecuencias, combos (complemento), ventana deslizante y dos punteros. Procesa 100.000 ventas en < 5 s. | [`analitica-cafe-origen/`](analitica-cafe-origen/) |
+| **Patitas — Motor de historial clínico v1.0** | Historial clínico con listas enlazadas, recepción con colas (prioridad urgencias), deshacer/rehacer con pilas y catálogo recursivo. Incluye simulación y demostración integrada. | [`patitas/`](patitas/) |
 
 ## Estructura del repositorio
 
 ```
 .
-├── analitica-cafe-origen/   # Proyecto Café Origen (código, README y RENDIMIENTO propios)
+├── analitica-cafe-origen/   # Proyecto Café Origen (src, pruebas/scripts, README, RENDIMIENTO)
+├── patitas/                 # Proyecto Patitas (src/estructuras, src/dominio, demo, pruebas, README)
 ├── docs/
-│   └── semana-1/            # Bitácoras de desarrollo (Día 1, Día 2, Día 3)
-├── patitas/                 # (espacio para otros ejercicios/proyectos)
-└── README.md                # Este archivo (índice general)
+│   ├── semana-1/            # Bitácoras Café Origen (Día 1, Día 2, Día 3)
+│   └── semana-2/            # Bitácoras Patitas (Día 1, Día 2, Día 3)
+└── README.md                # Índice general del repositorio
 ```
 
 ## Documentación
-- Cada proyecto incluye su propio `README.md` con instrucciones de ejecución.
-- Bitácoras y trazas del trabajo realizado: [`docs/semana-1/`](docs/semana-1/).
+- Cada proyecto incluye su propio `README.md` con instrucciones de ejecución y detalles.
+- **Café Origen:** [`analitica-cafe-origen/README.md`](analitica-cafe-origen/README.md) y [`analitica-cafe-origen/RENDIMIENTO.md`](analitica-cafe-origen/RENDIMIENTO.md). Bitácoras: [`docs/semana-1/`](docs/semana-1/).
+- **Patitas:** [`patitas/README.md`](patitas/README.md). Bitácoras: [`docs/semana-2/`](docs/semana-2/).
 
 ## Requisitos generales
-- [Node.js](https://nodejs.org/) >= 18 (para los proyectos JavaScript/Node del repositorio).
+- [Node.js](https://nodejs.org/) >= 18 (proyectos JavaScript/Node).
+- Git.
