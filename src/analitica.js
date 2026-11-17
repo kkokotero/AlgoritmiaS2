@@ -563,6 +563,8 @@ module.exports = {
   clientesRecurrentes,
   clientesRecurrentesSet,
   comprasPorCliente,
+  primerClienteUnico,
+  productoEstrellaPorCiudad,
   fechasConVentas,
   formatearMoneda,
   formatearNumero,
@@ -585,3 +587,83 @@ module.exports = {
   ventasPorCiudad,
   ventasPorCiudadM,
 };
+
+/**
+ * Identifica el producto estrella (más frecuente en ventas) de cada ciudad.
+ * Cuenta apariciones de cada producto por ciudad con un Map de Maps.
+ * En caso de empate, se conserva el primero que alcanzó la frecuencia máxima.
+ *
+ * @param {import('./datos.js').Venta[]} ventas - Ventas a analizar.
+ * @returns {Record<string, string>} Objeto ciudad -> producto estrella.
+ */
+function productoEstrellaPorCiudad(ventas) {
+  /** @type {Map<string, { etiqueta: string, conteos: Map<string, { etiqueta: string, cantidad: number }> }>} */
+  const porCiudad = new Map();
+
+  for (const venta of ventas) {
+    const cClave = claveCiudad(venta.ciudad);
+    const pClave = claveProducto(venta.producto);
+
+    if (!porCiudad.has(cClave)) {
+      porCiudad.set(cClave, {
+        etiqueta: normalizarCiudad(venta.ciudad),
+        conteos: new Map(),
+      });
+    }
+
+    const ciudad = porCiudad.get(cClave);
+    if (!ciudad) continue;
+
+    if (!ciudad.conteos.has(pClave)) {
+      ciudad.conteos.set(pClave, {
+        etiqueta: normalizarNombre(venta.producto),
+        cantidad: 0,
+      });
+    }
+
+    const prod = ciudad.conteos.get(pClave);
+    if (prod) {
+      prod.cantidad += 1;
+    }
+  }
+
+  /** @type {Record<string, string>} */
+  const resultado = {};
+  for (const [, ciudad] of porCiudad) {
+    let estrella = "";
+    let max = -1;
+    for (const [, prod] of ciudad.conteos) {
+      if (prod.cantidad > max) {
+        max = prod.cantidad;
+        estrella = prod.etiqueta;
+      }
+    }
+    resultado[ciudad.etiqueta] = estrella;
+  }
+
+  return resultado;
+}
+
+/**
+ * Devuelve el primer cliente, en orden de las ventas, que aparece una sola vez.
+ * Usa dos recorridos y un Map de conteos.
+ *
+ * @param {import('./datos.js').Venta[]} ventas - Ventas a analizar.
+ * @returns {string | null} Código del cliente único o null si no existe.
+ */
+function primerClienteUnico(ventas) {
+  /** @type {Map<string, number>} */
+  const conteos = new Map();
+
+  for (const venta of ventas) {
+    conteos.set(venta.cliente, (conteos.get(venta.cliente) || 0) + 1);
+  }
+
+  for (const venta of ventas) {
+    if (conteos.get(venta.cliente) === 1) {
+      return venta.cliente;
+    }
+  }
+
+  return null;
+}
