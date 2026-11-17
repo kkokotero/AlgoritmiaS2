@@ -1,4 +1,4 @@
-const Pila = require("./Pila");
+const Pila = require("../estructuras/Pila");
 
 /**
  * @typedef {{fecha: string, motivo: string, veterinario: string, costo: number}} Atencion
@@ -76,7 +76,7 @@ class Editor {
       }
     } else if (accion.tipo === "eliminar") {
       if (!this.registro.obtenerHistorial(accion.mascota)) {
-        this.registro.historiales.set(accion.mascota, new (require("./ListaEnlazada"))());
+        this.registro.historiales.set(accion.mascota, new (require("../estructuras/ListaEnlazada"))());
       }
       const historial = this.registro.obtenerHistorial(accion.mascota);
       if (historial) {

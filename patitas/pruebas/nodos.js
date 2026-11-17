@@ -3,7 +3,7 @@
  * Ejecutar desde `patitas/`: `node pruebas/nodos.js`
  */
 
-const Nodo = require("../src/Nodo");
+const Nodo = require("../src/estructuras/Nodo");
 
 /**
  * @typedef {{fecha: string, motivo: string, veterinario: string, costo: number}} Atencion

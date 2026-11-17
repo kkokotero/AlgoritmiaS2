@@ -5,8 +5,8 @@
 
 // @ts-ignore
 const assert = require("assert");
-const RegistroClinico = require("../src/RegistroClinico");
-const ListaEnlazada = require("../src/ListaEnlazada");
+const RegistroClinico = require("../src/dominio/RegistroClinico");
+const ListaEnlazada = require("../src/estructuras/ListaEnlazada");
 
 /**
  * @typedef {{fecha: string, motivo: string, veterinario: string, costo: number}} Atencion

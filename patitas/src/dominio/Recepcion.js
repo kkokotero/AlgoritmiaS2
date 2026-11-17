@@ -1,4 +1,4 @@
-const Cola = require("./Cola");
+const Cola = require("../estructuras/Cola");
 
 /**
  * @typedef {{hora: string, mascota: string, tipo: "Urgencia" | "General", motivo: string}} TurnoLlegada

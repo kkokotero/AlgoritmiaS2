@@ -6,8 +6,8 @@
 
 // @ts-ignore: módulo built-in de Node.js
 const assert = require("assert");
-const RegistroClinico = require("../src/RegistroClinico");
-const Editor = require("../src/Editor");
+const RegistroClinico = require("../src/dominio/RegistroClinico");
+const Editor = require("../src/dominio/Editor");
 
 /**
  * @typedef {{fecha: string, motivo: string, veterinario: string, costo: number}} Atencion

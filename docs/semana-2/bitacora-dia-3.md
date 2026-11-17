@@ -144,3 +144,38 @@ Error capturado: RangeError: Maximum call stack size exceeded
 - **Costo total / búsqueda:** versiones **iterativas** (`recorrer`/acumulación y `buscar`) como oficiales: mismo O(n) en tiempo pero O(1) en memoria y sin riesgo de desbordar la pila con historiales grandes.
 - **Imprimir al revés:** versión **recursiva** como utilitaria/demostrativa para historiales acotados (aprovecha la pila de llamadas sin estructuras auxiliares explícitas), pero no recomendada para listas muy grandes por el costo O(n) en pila y el riesgo de `RangeError`; para producción se preferiría una alternativa iterativa con estructura auxiliar explícita si se requiriera escalar.
 - **En general:** se dejan las versiones iterativas como oficiales en el motor por seguridad y consumo de memoria constante; las recursivas se conservan con fines didácticos y de comparación.
+
+---
+
+## Día 3 (cierre): Integración y motor Patitas v1.0
+
+### Demostración e integración
+- `patitas/demo.js` (raíz, `node demo.js`): 5 secciones numeradas sin errores — (1) catálogo y jerarquía, (2) simulación de la mañana con urgencias, (3) corrección con deshacer/rehacer (y regla: acción nueva vacía rehacer), (4) historiales finales, (5) búsqueda de servicio con ruta y precio de paquete + validación de sala vacía.
+- Organización de `src/`: `estructuras/` (Nodo, ListaEnlazada, Cola, Pila) y `dominio/` (RegistroClinico, Recepcion, Editor, catalogo, reporte, simulacion) con rutas `require` actualizadas.
+- `pruebas/todo.js`: al menos un caso normal y un caso borde por estructura, con resultado `OK`/`FALLA` (16 OK, 0 FALLA).
+
+### Resumen de los 12 MiniRetos (Semana 2)
+
+| # | MiniReto | Qué se construyó | Estructura elegida y por qué |
+|---:|---|---|---|
+| 1 | La consulta cero | Nodo y recorrido manual de una cadena | **Nodo**: unidad mínima (`dato`+`siguiente`) para modelar “cada atención apunta a la siguiente”. |
+| 2 | El historial clínico como lista | Inserción O(1) con `cabeza`/`cola` y recorrido | **Lista enlazada**: inserciones en extremos O(1) sin desplazamientos (vs arreglo). |
+| 3 | Corregir el historial | Búsqueda, inserción intermedia y eliminación segura | **Lista enlazada** + recorrido con anterior/actual para re-enlazar sin romper la cadena. |
+| 4 | Patitas v0.1 | Registro de varias mascotas y reporte | **Map + ListaEnlazada (RegistroClinico)**: acceso por mascota y historial cronológico secuencial. |
+| 5 | La sala de espera | Cola FIFO en O(1) y comparación con `shift` | **Cola (frente/final)**: FIFO natural; evita O(n) de `shift` del arreglo. |
+| 6 | Urgencias primero | Dos colas y simulación por tiempo | **Dos Colas + Recepción**: prioridad por tipo manteniendo FIFO dentro de cada una. |
+| 7 | Deshacer y rehacer | Pila y acciones reversibles | **Pila (LIFO)**: la última acción es la primera en revertirse; dos pilas para deshacer/rehacer. |
+| 8 | Patitas v0.2 | Recepción integrada con historiales y corrección | **Cola+Pila+Lista+Editor**: integración de flujos (atención) y consistencia (reversión). |
+| 9 | El catálogo anidado | Conteo, listado y profundidad recursivos | **Recursión sobre árbol n-ario**: refleja la estructura anidada de profundidad variable. |
+| 10 | Rutas y paquetes | Búsqueda con retorno temprano, rutas y precio con descuento único | **Recursión con retorno/construcción de rutas** y separación auxiliar/principal para descuento correcto. |
+| 11 | El historial recursivo | Operaciones recursivas sobre lista y costo de pila | **Recursión sobre nodos** (didáctica): mismas respuestas, pero O(n) en pila y riesgo de desbordamiento. |
+| 12 | Patitas v1.0 | Demostración, pruebas, README y organización | **Integración modular** (estructuras/dominio): producto documentado y verificable. |
+
+### Decisiones clave
+- **Iterativas como oficiales** en lista (tiempo igual, memoria O(1), sin `RangeError`); recursivas conservadas para análisis/demostración acotada.
+- **Cola y pila** sobre nodos/arreglo según operación de extremo en O(1); `shift` evitado por costo O(n).
+- **Recursión** para jerarquías de profundidad variable (catálogo) y para evidenciar el costo de la pila de llamadas.
+- **Acciones reversibles**: guardar dato e índice para restaurar exactamente y vaciar rehacer ante acción nueva.
+
+### Cierre
+`node demo.js` y `node pruebas/todo.js` (OK en todas) validan el motor v1.0. README y bitácora documentan estructuras, complejidades, trazas y decisiones.

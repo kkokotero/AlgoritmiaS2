@@ -5,7 +5,7 @@
 
 // @ts-ignore: módulo built-in de Node.js
 const assert = require("assert");
-const Cola = require("../src/Cola");
+const Cola = require("../src/estructuras/Cola");
 
 /**
  * @typedef {{mascota: string, tutor: string, horaLlegada: string, motivo: string}} Turno

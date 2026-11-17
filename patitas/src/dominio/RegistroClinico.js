@@ -1,4 +1,4 @@
-const ListaEnlazada = require("./ListaEnlazada");
+const ListaEnlazada = require("../estructuras/ListaEnlazada");
 
 /**
  * Registro clínico que mantiene un historial por mascota.

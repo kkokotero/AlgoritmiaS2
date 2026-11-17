@@ -1,18 +1,21 @@
 {
   "name": "patitas",
-  "version": "0.2.0",
-  "description": "Motor de historial clínico Patitas: listas enlazadas, colas, pilas y simulación (v0.2)",
-  "main": "src/simulacion.js",
+  "version": "1.0.0",
+  "description": "Motor de historial clínico Patitas v1.0: estructuras, dominio, catálogo recursivo y demostración",
+  "main": "demo.js",
   "scripts": {
+    "demo": "node demo.js",
+    "todo": "node pruebas/todo.js",
     "nodos": "node pruebas/nodos.js",
     "lista": "node pruebas/lista.js",
     "casos-borde": "node pruebas/casosBorde.js",
-    "reporte": "node src/reporte.js",
+    "reporte": "node src/dominio/reporte.js",
     "cola": "node pruebas/cola.js",
     "editor": "node pruebas/editor.js",
-    "simulacion": "node src/simulacion.js",
-    "catalogo": "node src/catalogo.js",
-    "test": "node pruebas/nodos.js && node pruebas/lista.js && node pruebas/casosBorde.js && node pruebas/cola.js && node pruebas/editor.js"
+    "simulacion": "node src/dominio/simulacion.js",
+    "catalogo": "node src/dominio/catalogo.js",
+    "recursivo": "node pruebas/recursivo.js",
+    "test": "node pruebas/nodos.js && node pruebas/lista.js && node pruebas/casosBorde.js && node pruebas/cola.js && node pruebas/editor.js && node pruebas/todo.js"
   },
   "keywords": [],
   "author": "",

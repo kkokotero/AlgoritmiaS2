@@ -5,7 +5,7 @@
 
 // @ts-ignore: módulo built-in de Node.js
 const assert = require("assert");
-const ListaEnlazada = require("../src/ListaEnlazada");
+const ListaEnlazada = require("../src/estructuras/ListaEnlazada");
 
 /**
  * @typedef {{fecha: string, motivo: string, veterinario: string, costo: number}} Atencion
@@ -43,8 +43,8 @@ function verificar(lista, esperadoCabeza, esperadoCola, esperadoTamanio, esperad
     assert.ok(lista.cola, `${etiqueta}: cola existe`);
     assert.ok(esperadoCabeza, `${etiqueta}: esperadoCabeza definido`);
     assert.ok(esperadoCola, `${etiqueta}: esperadoCola definido`);
-    const cabeza = /** @type {import("../src/Nodo")<Atencion>} */ (lista.cabeza);
-    const cola = /** @type {import("../src/Nodo")<Atencion>} */ (lista.cola);
+    const cabeza = /** @type {import("../src/estructuras/Nodo")<Atencion>} */ (lista.cabeza);
+    const cola = /** @type {import("../src/estructuras/Nodo")<Atencion>} */ (lista.cola);
     assert.strictEqual(cabeza.dato.fecha, esperadoCabeza, `${etiqueta}: cabeza dato`);
     assert.strictEqual(cola.dato.fecha, esperadoCola, `${etiqueta}: cola dato`);
     if (esperadoTamanio === 1) {
