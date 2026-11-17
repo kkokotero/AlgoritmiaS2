@@ -3,7 +3,7 @@
  * Ejecutar desde `patitas/`: `node pruebas/casosBorde.js`
  */
 
-const assert = require("assert");
+const assert = require("node:assert");
 const ListaEnlazada = require("../src/ListaEnlazada");
 
 /**
@@ -44,6 +44,8 @@ function verificarEstado(lista, esperado, etiqueta) {
     assert.strictEqual(lista.cabeza, null, `${etiqueta}: cabeza null`);
     assert.strictEqual(lista.cola, null, `${etiqueta}: cola null`);
   } else {
+    assert.ok(lista.cabeza, `${etiqueta}: cabeza existe`);
+    assert.ok(lista.cola, `${etiqueta}: cola existe`);
     assert.strictEqual(lista.cabeza.dato.fecha, esperado[0], `${etiqueta}: cabeza`);
     assert.strictEqual(lista.cola.dato.fecha, esperado[esperado.length - 1], `${etiqueta}: cola`);
     assert.strictEqual(lista.cola.siguiente, null, `${etiqueta}: cola.siguiente null`);
@@ -74,6 +76,7 @@ const porFecha = (f) => (d) => d.fecha === f;
   const lista = new ListaEnlazada();
   lista.agregarAlFinal(at("A"));
   const res = lista.eliminar(porFecha("A"));
+  assert.ok(res, "único: devuelve dato");
   assert.strictEqual(res.fecha, "A", "único: dato eliminado");
   verificarEstado(lista, [], "2. Eliminar el único nodo");
 }
@@ -83,6 +86,7 @@ const porFecha = (f) => (d) => d.fecha === f;
   const lista = new ListaEnlazada();
   ["A", "B", "C"].forEach((f) => lista.agregarAlFinal(at(f)));
   const res = lista.eliminar(porFecha("A"));
+  assert.ok(res, "cabeza: devuelve dato");
   assert.strictEqual(res.fecha, "A");
   verificarEstado(lista, ["B", "C"], "3. Eliminar la cabeza");
 }
@@ -92,6 +96,7 @@ const porFecha = (f) => (d) => d.fecha === f;
   const lista = new ListaEnlazada();
   ["A", "B", "C"].forEach((f) => lista.agregarAlFinal(at(f)));
   const res = lista.eliminar(porFecha("C"));
+  assert.ok(res, "cola: devuelve dato");
   assert.strictEqual(res.fecha, "C");
   verificarEstado(lista, ["A", "B"], "4. Eliminar la cola (nueva cola.siguiente null)");
 }
@@ -118,7 +123,9 @@ const porFecha = (f) => (d) => d.fecha === f;
 {
   const lista = new ListaEnlazada();
   ["A", "C"].forEach((f) => lista.agregarAlFinal(at(f)));
-  assert.strictEqual(lista.buscar(porFecha("A")).fecha, "A");
+  const encontrada = lista.buscar(porFecha("A"));
+  assert.ok(encontrada, "buscar: encontrada");
+  assert.strictEqual(encontrada.fecha, "A");
   assert.strictEqual(lista.buscar(porFecha("Z")), null);
   assert.strictEqual(lista.insertarDespuesDe(porFecha("Z"), at("X")), false);
   lista.insertarDespuesDe(porFecha("A"), at("B"));

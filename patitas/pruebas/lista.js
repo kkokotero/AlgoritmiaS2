@@ -3,7 +3,7 @@
  * Ejecutar desde `patitas/`: `node pruebas/lista.js`
  */
 
-const assert = require("assert");
+const assert = require("node:assert");
 const ListaEnlazada = require("../src/ListaEnlazada");
 
 /**
@@ -40,6 +40,8 @@ function verificar(lista, esperadoCabeza, esperadoCola, esperadoTamanio, esperad
   } else {
     assert.ok(lista.cabeza, `${etiqueta}: cabeza existe`);
     assert.ok(lista.cola, `${etiqueta}: cola existe`);
+    assert.ok(esperadoCabeza, `${etiqueta}: esperadoCabeza definido`);
+    assert.ok(esperadoCola, `${etiqueta}: esperadoCola definido`);
     assert.strictEqual(lista.cabeza.dato.fecha, esperadoCabeza, `${etiqueta}: cabeza dato`);
     assert.strictEqual(lista.cola.dato.fecha, esperadoCola, `${etiqueta}: cola dato`);
     if (esperadoTamanio === 1) {

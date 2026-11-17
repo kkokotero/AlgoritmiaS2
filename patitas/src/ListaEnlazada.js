@@ -1,9 +1,16 @@
 const Nodo = require("./Nodo");
 
 /**
+ * @typedef {{fecha: string, motivo: string, veterinario: string, costo: number}} Atencion
+ */
+
+/**
  * Lista enlazada simple con referencias a cabeza y cola.
  */
 class ListaEnlazada {
+  /**
+   * Crea una lista enlazada vacía.
+   */
   constructor() {
     /** @type {Nodo | null} */
     this.cabeza = null;

@@ -43,6 +43,7 @@ const cabeza = nodo1;
 
 // Recorrido 1: imprimir cada atención
 console.log("=== Historial de atenciones (Lola) ===");
+/** @type {Nodo | null} */
 let actual = cabeza;
 while (actual !== null) {
   const { fecha, motivo, veterinario, costo } = actual.dato;
@@ -51,6 +52,7 @@ while (actual !== null) {
 }
 
 // Recorrido 2: calcular costo total
+/** @type {Nodo | null} */
 let actualCosto = cabeza;
 let costoTotal = 0;
 while (actualCosto !== null) {
