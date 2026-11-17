@@ -11,6 +11,7 @@
     "cola": "node pruebas/cola.js",
     "editor": "node pruebas/editor.js",
     "simulacion": "node src/simulacion.js",
+    "catalogo": "node src/catalogo.js",
     "test": "node pruebas/nodos.js && node pruebas/lista.js && node pruebas/casosBorde.js && node pruebas/cola.js && node pruebas/editor.js"
   },
   "keywords": [],
