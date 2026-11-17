@@ -5,8 +5,12 @@
 
 const Nodo = require("../src/Nodo");
 
+/**
+ * @typedef {{fecha: string, motivo: string, veterinario: string, costo: number}} Atencion
+ */
+
 // Atenciones de Lola (gata, 4 años) en orden cronológico
-/** @type {{fecha: string, motivo: string, veterinario: string, costo: number}} */
+/** @type {Atencion} */
 const atencion1 = {
   fecha: "02/02",
   motivo: "Vacunación",
@@ -14,7 +18,7 @@ const atencion1 = {
   costo: 85000,
 };
 
-/** @type {{fecha: string, motivo: string, veterinario: string, costo: number}} */
+/** @type {Atencion} */
 const atencion2 = {
   fecha: "15/03",
   motivo: "Control de peso",
@@ -22,7 +26,7 @@ const atencion2 = {
   costo: 40000,
 };
 
-/** @type {{fecha: string, motivo: string, veterinario: string, costo: number}} */
+/** @type {Atencion} */
 const atencion3 = {
   fecha: "20/05",
   motivo: "Limpieza dental",
@@ -38,12 +42,12 @@ const nodo3 = new Nodo(atencion3);
 nodo1.siguiente = nodo2;
 nodo2.siguiente = nodo3;
 
-/** @type {Nodo | null} */
+/** @type {Nodo<Atencion> | null} */
 const cabeza = nodo1;
 
 // Recorrido 1: imprimir cada atención
 console.log("=== Historial de atenciones (Lola) ===");
-/** @type {Nodo | null} */
+/** @type {Nodo<Atencion> | null} */
 let actual = cabeza;
 while (actual !== null) {
   const { fecha, motivo, veterinario, costo } = actual.dato;
@@ -52,7 +56,7 @@ while (actual !== null) {
 }
 
 // Recorrido 2: calcular costo total
-/** @type {Nodo | null} */
+/** @type {Nodo<Atencion> | null} */
 let actualCosto = cabeza;
 let costoTotal = 0;
 while (actualCosto !== null) {

@@ -12,9 +12,9 @@ class ListaEnlazada {
    * Crea una lista enlazada vacía.
    */
   constructor() {
-    /** @type {Nodo | null} */
+    /** @type {Nodo<Atencion> | null} */
     this.cabeza = null;
-    /** @type {Nodo | null} */
+    /** @type {Nodo<Atencion> | null} */
     this.cola = null;
     /** @type {number} */
     this.tamanio = 0;
