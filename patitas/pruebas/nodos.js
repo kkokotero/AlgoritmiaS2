@@ -1,6 +1,12 @@
+/**
+ * Prueba Día 1: creación de nodos, enlace manual y recorridos (sin índices/arreglos).
+ * Ejecutar desde `patitas/`: `node pruebas/nodos.js`
+ */
+
 const Nodo = require("../src/Nodo");
 
 // Atenciones de Lola (gata, 4 años) en orden cronológico
+/** @type {{fecha: string, motivo: string, veterinario: string, costo: number}} */
 const atencion1 = {
   fecha: "02/02",
   motivo: "Vacunación",
@@ -8,6 +14,7 @@ const atencion1 = {
   costo: 85000,
 };
 
+/** @type {{fecha: string, motivo: string, veterinario: string, costo: number}} */
 const atencion2 = {
   fecha: "15/03",
   motivo: "Control de peso",
@@ -15,6 +22,7 @@ const atencion2 = {
   costo: 40000,
 };
 
+/** @type {{fecha: string, motivo: string, veterinario: string, costo: number}} */
 const atencion3 = {
   fecha: "20/05",
   motivo: "Limpieza dental",
@@ -30,6 +38,7 @@ const nodo3 = new Nodo(atencion3);
 nodo1.siguiente = nodo2;
 nodo2.siguiente = nodo3;
 
+/** @type {Nodo | null} */
 const cabeza = nodo1;
 
 // Recorrido 1: imprimir cada atención

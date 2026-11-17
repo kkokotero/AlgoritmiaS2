@@ -1,14 +1,40 @@
+/**
+ * Pruebas de casos borde: buscar, insertarDespuesDe y eliminar.
+ * Ejecutar desde `patitas/`: `node pruebas/casosBorde.js`
+ */
+
 const assert = require("assert");
 const ListaEnlazada = require("../src/ListaEnlazada");
 
+/**
+ * @typedef {{fecha: string, motivo: string, veterinario: string, costo: number}} Atencion
+ */
+
+/**
+ * Crea una atención de prueba con fecha dada.
+ * @param {string} fecha - Fecha identificadora.
+ * @returns {Atencion} Atención de prueba.
+ */
 function at(fecha) {
   return { fecha, motivo: "m", veterinario: "v", costo: 1000 };
 }
 
+/**
+ * Obtiene las fechas de los datos de la lista en orden.
+ * @param {ListaEnlazada} lista - Lista enlazada.
+ * @returns {string[]} Arreglo de fechas.
+ */
 function fechas(lista) {
   return lista.aArreglo().map((d) => d.fecha);
 }
 
+/**
+ * Verifica el estado completo de la lista.
+ * @param {ListaEnlazada} lista - Lista a verificar.
+ * @param {string[]} esperado - Fechas esperadas en orden.
+ * @param {string} etiqueta - Nombre del caso.
+ * @returns {void}
+ */
 function verificarEstado(lista, esperado, etiqueta) {
   assert.strictEqual(lista.tamanio, esperado.length, `${etiqueta}: tamanio`);
   assert.strictEqual(lista.obtenerTamanio(), esperado.length, `${etiqueta}: obtenerTamanio`);
@@ -28,6 +54,11 @@ function verificarEstado(lista, esperado, etiqueta) {
   console.log(`OK - ${etiqueta}`);
 }
 
+/**
+ * Crea una condición que compara por fecha.
+ * @param {string} f - Fecha a buscar.
+ * @returns {(d: Atencion) => boolean} Función condición.
+ */
 const porFecha = (f) => (d) => d.fecha === f;
 
 // 1. Eliminar en una lista vacía

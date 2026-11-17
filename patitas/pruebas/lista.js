@@ -1,10 +1,35 @@
+/**
+ * Pruebas de ListaEnlazada: inserción al inicio/final en los 6 casos de diseño.
+ * Ejecutar desde `patitas/`: `node pruebas/lista.js`
+ */
+
 const assert = require("assert");
 const ListaEnlazada = require("../src/ListaEnlazada");
 
+/**
+ * @typedef {{fecha: string, motivo: string, veterinario: string, costo: number}} Atencion
+ */
+
+/**
+ * Crea una atención de prueba.
+ * @param {string} fecha - Fecha de la atención.
+ * @param {string} motivo - Motivo de la atención.
+ * @returns {Atencion} Atención de prueba.
+ */
 function atencion(fecha, motivo) {
   return { fecha, motivo, veterinario: "Vet", costo: 1000 };
 }
 
+/**
+ * Verifica el estado de la lista tras una operación.
+ * @param {ListaEnlazada} lista - Lista a verificar.
+ * @param {string | null} esperadoCabeza - Fecha esperada en cabeza (o null).
+ * @param {string | null} esperadoCola - Fecha esperada en cola (o null).
+ * @param {number} esperadoTamanio - Tamaño esperado.
+ * @param {string[]} esperadoArreglo - Fechas esperadas en orden.
+ * @param {string} etiqueta - Nombre del caso.
+ * @returns {void}
+ */
 function verificar(lista, esperadoCabeza, esperadoCola, esperadoTamanio, esperadoArreglo, etiqueta) {
   assert.strictEqual(lista.estaVacia(), esperadoTamanio === 0, `${etiqueta}: estaVacia`);
   assert.strictEqual(lista.obtenerTamanio(), esperadoTamanio, `${etiqueta}: tamanio`);

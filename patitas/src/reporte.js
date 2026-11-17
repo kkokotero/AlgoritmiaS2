@@ -1,12 +1,22 @@
+/**
+ * Script de reporte clínico Patitas v0.1.
+ * Carga datos, recorre historiales y muestra totales y última vacunación.
+ */
+
 const RegistroClinico = require("./RegistroClinico");
 
 /**
+ * @typedef {{fecha: string, motivo: string, veterinario: string, costo: number}} Atencion
+ */
+
+/**
  * Carga los datos digitalizados en el registro.
- * @returns {RegistroClinico}
+ * @returns {RegistroClinico} Registro con los historiales cargados.
  */
 function cargarDatos() {
   const registro = new RegistroClinico();
 
+  /** @type {[string, Atencion][]} */
   const datos = [
     ["Lola (gata)", { fecha: "02/02", motivo: "Vacunación anual", veterinario: "Dra. Ríos", costo: 85000 }],
     ["Lola (gata)", { fecha: "15/03", motivo: "Control de peso", veterinario: "Dr. Gómez", costo: 40000 }],
@@ -25,13 +35,19 @@ function cargarDatos() {
   return registro;
 }
 
+/**
+ * Determina si una atención corresponde a una vacunación.
+ * @param {Atencion} dato - Atención a evaluar.
+ * @returns {boolean} `true` si el motivo indica vacunación.
+ */
 function esVacunacion(dato) {
   return /vacun/i.test(dato.motivo);
 }
 
 /**
  * Genera e imprime el reporte de historiales.
- * @param {RegistroClinico} registro
+ * @param {RegistroClinico} registro - Registro clínico con los historiales.
+ * @returns {void}
  */
 function generarReporte(registro) {
   console.log("=== REPORTE CLÍNICO — PATITAS v0.1 ===\n");
