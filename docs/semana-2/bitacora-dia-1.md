@@ -27,21 +27,7 @@ const cabeza = nodo1;
 
 ## Diagrama de nodos y flechas
 
-```
-cabeza
-  │
-  ▼
-┌──────────────────────────────────────────┐    ┌──────────────────────────────────────────┐    ┌──────────────────────────────────────────┐
-│ Nodo (nodo1)                             │    │ Nodo (nodo2)                             │    │ Nodo (nodo3)                             │
-│ dato: {                                  │    │ dato: {                                  │    │ dato: {                                  │
-│   fecha: "02/02"                         │    │   fecha: "15/03"                         │    │   fecha: "20/05"                         │
-│   motivo: "Vacunación"                   │    │   motivo: "Control de peso"              │    │   motivo: "Limpieza dental"              │
-│   veterinario: "Dra. Ríos"               │    │   veterinario: "Dr. Gómez"               │    │   veterinario: "Dra. Ríos"               │
-│   costo: 85000                           │    │   costo: 40000                           │    │   costo: 150000                          │
-│ }                                        │    │ }                                        │    │ }                                        │
-│ siguiente ───────────────────────────────┼───▶│ siguiente ───────────────────────────────┼───▶│ siguiente ───────────────────────────────┼───▶ null
-└──────────────────────────────────────────┘    └──────────────────────────────────────────┘    └──────────────────────────────────────────┘
-```
+![Diagrama de nodos y flechas](./images/dia-1-nodos-flechas.png)
 
 Representación compacta:
 `cabeza → [02/02 Vacunación, $85000 | •] → [15/03 Control de peso, $40000 | •] → [20/05 Limpieza dental, $150000 | null]`
