@@ -223,3 +223,34 @@ Se verifica después de cada prueba `cabeza`, `cola`, `tamanio`/`estaVacia()` y 
 
 ### ¿Por qué eliminar la cola en una lista simplemente enlazada requiere recorrerla?
 En una lista **simplemente enlazada** cada nodo solo conoce su `siguiente`, no su anterior. Aunque tengamos referencia directa a la `cola`, para eliminarla debemos hacer que el **penúltimo** nodo pase a ser la nueva cola y que su `siguiente` sea `null`. Pero el penúltimo no es accesible desde la cola (no hay enlace hacia atrás), así que la única forma de encontrarlo es recorrer desde la `cabeza` llevando un puntero `anterior` hasta que `actual === cola`. Por eso la eliminación de la cola cuesta **O(n)**. (En una lista doblemente enlazada, el penúltimo sería `cola.anterior` y podría hacerse en O(1).)
+
+---
+
+## Día 1 (cierre): Registro clínico, reporte y comparación (v0.1)
+
+### Integración
+- `patitas/src/RegistroClinico.js`: composición de clases; guarda un `historial` (`ListaEnlazada`) por mascota usando un `Map` (clave = nombre). `registrarAtencion(mascota, atencion)` crea el historial si no existe y agrega la atención al final.
+- `patitas/src/reporte.js`: carga los datos digitalizados (Lola, Toby, Mía), muestra historial en orden cronológico, número de atenciones y costo total; obtiene la **última vacunación** de cada mascota con `buscar` (condición sobre `motivo`, sin índices) o muestra "sin registro".
+
+**Ejecución:** `node patitas/src/reporte.js`
+
+**Resultado obtenido:**
+- Lola (gata): 3 atenciones, costo total **$275.000**, última vacunación 02/02 (Vacunación anual, Dra. Ríos).
+- Toby (perro): 3 atenciones, costo total **$265.000**, última vacunación 05/04 (Vacunación anual, Dra. Ríos).
+- Mía (gata): 2 atenciones, costo total **$280.000**, última vacunación **sin registro**.
+
+### Tabla comparativa: Lista enlazada vs. Arreglo
+
+| Operación | Lista enlazada (con `cabeza`, `cola`) | Arreglo (típico) | Comentario |
+|---|---:|---:|---|
+| Agregar al final | **O(1)** (usando `cola`) | **O(1)** amortizado (`push`) | En lista es O(1) estricto si se mantiene `cola`; el arreglo puede redimensionarse ocasionalmente |
+| Agregar al inicio | **O(1)** (ajustar `cabeza`) | **O(n)** (`unshift`) | El arreglo debe desplazar todos los elementos |
+| Acceder a la atención número k | **O(k)** / O(n) | **O(1)** | La lista debe recorrer desde `cabeza`; el arreglo accede por índice directo |
+| Buscar (por condición/valor) | **O(n)** | **O(n)** | Ambas requieren recorrido/búsqueda lineal (sin índice ordenado/hash) |
+| Eliminar la primera (cabeza) | **O(1)** | **O(n)** (`shift`) | En lista se mueve `cabeza`; en arreglo se desplazan elementos (eliminar intermedia/cola en lista simple también es O(n) por búsqueda del anterior) |
+
+**Conclusión:** la lista enlazada favorece inserciones/eliminaciones en extremos (especialmente inicio y final con `cola`) sin desplazamientos, a costa de no tener acceso aleatorio por índice; el arreglo favorece el acceso por posición `k` en O(1).
+
+### Estructura y documentación
+- `patitas/README.md` actualizado: descripción, cómo ejecutar, estructuras/módulos y versión **v0.1**.
+- Bitácora consolidada en `docs/semana-2/bitacora-dia-1.md` (diagramas, casos borde, complejidades y esta comparación).
