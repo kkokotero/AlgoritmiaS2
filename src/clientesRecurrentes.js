@@ -59,16 +59,19 @@ function generarVentas(n, clientesUnicos = 2000) {
 }
 
 /**
- * Mide el tiempo de ejecución de una función.
+ * Mide el tiempo de ejecución de una función (console.time + hrtime).
  * @param {(ventas: import('./datos.js').Venta[]) => Set<string> | string[]} fn
  * @param {import('./datos.js').Venta[]} ventas
  * @param {string} etiqueta
  * @returns {{ ms: number, resultado: Set<string> | string[], etiqueta: string }}
  */
 function medir(fn, ventas, etiqueta) {
+  const label = `${etiqueta} (${ventas.length})`;
+  console.time(label);
   const inicio = process.hrtime.bigint();
   const resultado = fn(ventas);
   const fin = process.hrtime.bigint();
+  console.timeEnd(label);
   const ms = Number(fin - inicio) / 1e6;
   return { ms, resultado, etiqueta };
 }
