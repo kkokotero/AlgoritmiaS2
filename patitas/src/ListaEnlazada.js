@@ -212,6 +212,95 @@ class ListaEnlazada {
 
     return null;
   }
+
+
+  /**
+   * Calcula el tamaño de forma recursiva (usa auxiliar que recibe un nodo).
+   * @returns {number} Cantidad de nodos.
+   */
+  tamanioRecursivo() {
+    return this._tamanioNodo(this.cabeza);
+  }
+
+  /**
+   * Auxiliar recursivo para contar nodos.
+   * @param {Nodo<Atencion> | null} nodo - Nodo actual.
+   * @returns {number} Cantidad de nodos desde este nodo.
+   */
+  _tamanioNodo(nodo) {
+    if (nodo === null) {
+      return 0;
+    }
+    return 1 + this._tamanioNodo(nodo.siguiente);
+  }
+
+  /**
+   * Calcula el costo total de forma recursiva.
+   * @returns {number} Suma de costos.
+   */
+  costoTotalRecursivo() {
+    return this._costoNodo(this.cabeza);
+  }
+
+  /**
+   * Auxiliar recursivo para sumar costos.
+   * @param {Nodo<Atencion> | null} nodo - Nodo actual.
+   * @returns {number} Suma de costos desde este nodo.
+   */
+  _costoNodo(nodo) {
+    if (nodo === null) {
+      return 0;
+    }
+    return nodo.dato.costo + this._costoNodo(nodo.siguiente);
+  }
+
+  /**
+   * Busca el primer dato que cumple la condición de forma recursiva.
+   * @param {(dato: Atencion) => boolean} condicion - Condición de búsqueda.
+   * @returns {Atencion | null} Dato encontrado o null.
+   */
+  buscarRecursivo(condicion) {
+    return this._buscarNodo(this.cabeza, condicion);
+  }
+
+  /**
+   * Auxiliar recursivo para buscar.
+   * @param {Nodo<Atencion> | null} nodo - Nodo actual.
+   * @param {(dato: Atencion) => boolean} condicion - Condición de búsqueda.
+   * @returns {Atencion | null} Dato encontrado o null.
+   */
+  _buscarNodo(nodo, condicion) {
+    if (nodo === null) {
+      return null;
+    }
+    if (condicion(nodo.dato)) {
+      return nodo.dato;
+    }
+    return this._buscarNodo(nodo.siguiente, condicion);
+  }
+
+  /**
+   * Imprime el historial en orden inverso (más reciente a más antigua) sin arreglos ni pilas explícitas.
+   * @returns {void}
+   */
+  imprimirAlReves() {
+    this._imprimirNodoAlReves(this.cabeza);
+  }
+
+  /**
+   * Auxiliar recursivo: desciende hasta el final y imprime al retornar.
+   * @param {Nodo<Atencion> | null} nodo - Nodo actual.
+   * @returns {void}
+   */
+  _imprimirNodoAlReves(nodo) {
+    if (nodo === null) {
+      return;
+    }
+    this._imprimirNodoAlReves(nodo.siguiente);
+    const { fecha, motivo, veterinario, costo } = nodo.dato;
+    console.log(`  - ${fecha} | ${motivo} | ${veterinario} | ${costo}`);
+  }
+
 }
 
 module.exports = ListaEnlazada;

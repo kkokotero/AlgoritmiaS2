@@ -97,3 +97,50 @@ Las tres funciones resuelven el recorrido del árbol n-cario de categorías medi
 **Correcto:** sumar todo recursivamente (280000+350000+150000 = **780000**) y aplicar 10% **una sola vez** → 780000 * 0.9 = **702000**.
 
 **Por qué es incorrecto:** el descuento se compone por nivel (se descuenta 10% sobre valores ya descontados). Con n niveles de composición se aplicaría (0.9)^n, reduciendo el precio más de lo debido (631800 en vez de 702000, diferencia de 70200). La regla de negocio pide 10% sobre el total del paquete, no un descuento acumulado por rama/nivel. Por eso se separa la suma recursiva (`sumarServicios`) de la función principal que aplica el descuento una única vez (`precioPaquete`).
+
+---
+
+## Día 3 (continuación): Recursión sobre la lista enlazada
+
+### Idea
+Una lista enlazada es recursiva por definición: es `null` (lista vacía) o un nodo seguido de otra lista (su `siguiente`). Por eso las operaciones pueden expresarse como funciones auxiliares que reciben un nodo.
+
+### Implementación en `ListaEnlazada` (`patitas/src/ListaEnlazada.js`)
+- `tamanioRecursivo()` / `_tamanioNodo(nodo)`: caso base `nodo === null → 0`; reducción `nodo.siguiente`; combinación `1 + _tamanioNodo(nodo.siguiente)`.
+- `costoTotalRecursivo()` / `_costoNodo(nodo)`: base `null → 0`; combinación `nodo.dato.costo + _costoNodo(nodo.siguiente)`.
+- `buscarRecursivo(condicion)` / `_buscarNodo(nodo, condicion)`: base `null → null`; si cumple retorna el dato, si no reduce a `nodo.siguiente`.
+- `imprimirAlReves()` / `_imprimirNodoAlReves(nodo)`: base `null`; llama primero a `_imprimirNodoAlReves(nodo.siguiente)` y **luego** imprime el nodo actual.
+
+### ¿Por qué `imprimirAlReves` funciona sin estructuras auxiliares?
+Cada llamada recursiva queda **suspendida** en la pila de llamadas esperando a que termine la llamada sobre `nodo.siguiente`. La recursión avanza hasta el final (base `null`) apilando un marco por nodo; al retornar, los marcos se desapilan en orden inverso (LIFO) al que se apilaron, ejecutándose la instrucción de impresión pendiente en cada retorno. Así, la propia pila de llamadas almacena implícitamente el camino recorrido y produce la salida de la atención más reciente a la más antigua, sin necesidad de arreglos ni pilas explícitas.
+
+### Verificación (mismos resultados que iterativos)
+Con los historiales de Lola, Toby y Mía (`node pruebas/recursivo.js`):
+- Lola: tamaño iter/rec = 3/3, costo 275000/275000, búsqueda (vacunación) coincide. Inverso: 20/05, 15/03, 02/02.
+- Toby: 3/3, 265000/265000, coincide. Inverso: 05/04, 12/01, 10/01.
+- Mía: 2/2, 280000/280000, coincide (sin vacunación → `null`). Inverso: 25/02, 18/02.
+
+### Prueba de desbordamiento (100.000 atenciones)
+Se crea una lista con 100.000 atenciones y `obtenerTamanio()` (iterativo) devuelve 100000. Al ejecutar `tamanioRecursivo()`:
+```
+Lista creada con tamanio (iterativo): 100000
+Error capturado: RangeError: Maximum call stack size exceeded
+```
+**Causa:** cada llamada recursiva reserva un marco en la pila de llamadas (parámetros, dirección de retorno, variables locales). La profundidad de recursión es igual al número de nodos `n`, por lo que la memoria de pila crece como **O(n)**. Al superar el límite de la pila del motor (Node/V8, del orden de miles de llamadas), se produce el desbordamiento. La versión iterativa usa un puntero `actual` y consume memoria auxiliar **O(1)**, independiente de `n`.
+
+### Comparación de complejidad
+
+| Operación | Iterativa — Tiempo | Iterativa — Memoria | Recursiva — Tiempo | Recursiva — Memoria (pila) |
+|---|---:|---:|---:|---:|
+| Tamaño (`obtenerTamanio` / `tamanioRecursivo`) | O(n) / O(1)* | O(1) | O(n) | **O(n)** |
+| Costo total (`recorrer`+acum / `costoTotalRecursivo`) | O(n) | O(1) | O(n) | **O(n)** |
+| Búsqueda (`buscar` / `buscarRecursivo`) | O(n) | O(1) | O(n) | **O(n)** (O(k) hasta hallar) |
+| Imprimir al revés (`imprimirAlReves`) | O(n) con pila/arreglo auxiliar: O(n) | O(n) | O(n) | **O(n)** (pila implícita) |
+
+\*`obtenerTamanio()` iterativo es O(1) por mantener contador; el conteo por recorrido sería O(n).
+
+### Decisión oficial en el motor (justificación)
+- **Tamaño:** `obtenerTamanio()` (contador, O(1) tiempo y memoria) como oficial.
+- **Costo total / búsqueda:** versiones **iterativas** (`recorrer`/acumulación y `buscar`) como oficiales: mismo O(n) en tiempo pero O(1) en memoria y sin riesgo de desbordar la pila con historiales grandes.
+- **Imprimir al revés:** versión **recursiva** como utilitaria/demostrativa para historiales acotados (aprovecha la pila de llamadas sin estructuras auxiliares explícitas), pero no recomendada para listas muy grandes por el costo O(n) en pila y el riesgo de `RangeError`; para producción se preferiría una alternativa iterativa con estructura auxiliar explícita si se requiriera escalar.
+- **En general:** se dejan las versiones iterativas como oficiales en el motor por seguridad y consumo de memoria constante; las recursivas se conservan con fines didácticos y de comparación.
