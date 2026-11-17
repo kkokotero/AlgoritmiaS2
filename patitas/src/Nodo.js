@@ -1,18 +1,15 @@
 /**
- * @typedef {{fecha: string, motivo: string, veterinario: string, costo: number}} Atencion
- */
-
-/**
- * Nodo de una lista enlazada que representa una atención clínica.
+ * @template T
+ * Nodo de una estructura enlazada.
  */
 class Nodo {
   /**
-   * @param {Atencion} dato - Atención clínica almacenada en el nodo.
+   * @param {T} dato - Dato almacenado en el nodo.
    */
   constructor(dato) {
-    /** @type {Atencion} */
+    /** @type {T} */
     this.dato = dato;
-    /** @type {Nodo | null} */
+    /** @type {Nodo<T> | null} */
     this.siguiente = null;
   }
 }
