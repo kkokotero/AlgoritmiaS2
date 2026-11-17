@@ -156,3 +156,70 @@ Todos los casos pasaron.
 | `agregarAlInicio` | **O(1)** | O(1) | Usa `cabeza` directamente, no recorre la lista |
 | `recorrer` | O(n) | O(1) | Visita cada uno de los n nodos una vez |
 | `aArreglo` | O(n) | O(n) | Recorre n nodos y crea un arreglo de n elementos |
+
+---
+
+## Día 1 (continuación): Búsqueda, inserción intermedia y eliminación
+
+### Objetivo
+Agregar operaciones de corrección al historial sin dejarlo “cortado”: buscar una atención, insertar después de un nodo dado y eliminar un nodo, cubriendo casos borde de cabeza, cola y lista vacía.
+
+### Implementación (`patitas/src/ListaEnlazada.js`)
+- `buscar(condicion)`: recorre desde `cabeza` con `actual` y devuelve el primer `dato` que cumple la condición, o `null`.
+- `insertarDespuesDe(condicion, dato)`: recorre hasta hallar el nodo; crea `nuevo`, hace `nuevo.siguiente = actual.siguiente` y `actual.siguiente = nuevo`; si `actual === cola` actualiza `cola = nuevo`; incrementa `tamanio`. Devuelve `true/false`.
+- `eliminar(condicion)`: si vacía retorna `null`; si la cabeza cumple, avanza `cabeza` (y si queda vacía `cola = null`); si no, recorre con `anterior` y `actual` para desenganchar (`anterior.siguiente = actual.siguiente`) y si `actual === cola` actualiza `cola = anterior`; decrementa `tamanio` y devuelve el dato eliminado.
+
+### Dibujos previos: tres casos de eliminación
+Estado inicial de referencia: `cabeza -> [A|•]->[B|•]->[C|null] <- cola`, `tamanio=3`.
+
+#### 1. Eliminar la cabeza (A)
+```
+Antes:   cabeza -> [A|•] -> [B|•] -> [C|null] <- cola
+Acción:  cabeza = cabeza.siguiente  (cabeza pasa a B)
+Después: cabeza -> [B|•] -> [C|null] <- cola    (A queda fuera)  tamanio=2
+```
+No se necesita `anterior`. Si además era el único nodo, `cabeza` queda `null` y se hace `cola = null`.
+
+#### 2. Eliminar un nodo intermedio (B)
+```
+Antes:   cabeza -> [A|•] -> [B|•] -> [C|null] <- cola
+                 anterior  actual
+Acción:  anterior.siguiente = actual.siguiente  (A apunta a C)
+Después: cabeza -> [A|•] -> [C|null] <- cola    (B queda fuera)  tamanio=2
+```
+`cola` no cambia porque el eliminado no era la cola.
+
+#### 3. Eliminar la cola (C)
+```
+Antes:   cabeza -> [A|•] -> [B|•] -> [C|null] <- cola
+                 anterior  actual(==cola)
+Acción:  anterior.siguiente = actual.siguiente (B->null), cola = anterior
+Después: cabeza -> [A|•] -> [B|null] <- cola    (C queda fuera)  tamanio=2
+```
+La nueva cola (`B`) queda con `siguiente === null`, manteniendo el historial íntegro.
+
+### Pruebas de casos borde (`patitas/pruebas/casosBorde.js`)
+Se verifica después de cada prueba `cabeza`, `cola`, `tamanio`/`estaVacia()` y orden (`aArreglo()`), y que `cola.siguiente === null` cuando aplica.
+
+| Prueba | Resultado esperado | Estado |
+|---|---|---|
+| 1. Eliminar en lista vacía | devuelve `null`, lista sigue vacía | OK |
+| 2. Eliminar el único nodo | devuelve dato, `cabeza=cola=null`, tamanio 0 | OK |
+| 3. Eliminar la cabeza | cabeza avanza, orden y referencias correctos | OK |
+| 4. Eliminar la cola | nueva cola correcta y `cola.siguiente === null` | OK |
+| 5. Eliminar algo que no existe | devuelve `null`, lista sin cambios | OK |
+| 6. Insertar después de la cola | inserta al final y actualiza `cola` | OK |
+| Extra. Buscar / insertar en medio / no encontrado | comportamientos correctos | OK |
+
+**Ejecución:** `node patitas/pruebas/casosBorde.js` → todas las pruebas pasaron.
+
+### Complejidad de las operaciones
+
+| Método | Tiempo | Espacio extra | Justificación |
+|---|---:|---:|---|
+| `buscar(condicion)` | O(n) | O(1) | Recorre secuencialmente hasta hallar o llegar a `null` |
+| `insertarDespuesDe(condicion, dato)` | O(n) | O(1) | Debe buscar el nodo objetivo; el re-enlace es O(1) |
+| `eliminar(condicion)` | O(n) | O(1) | Búsqueda secuencial con `anterior/actual`; re-enlace O(1) |
+
+### ¿Por qué eliminar la cola en una lista simplemente enlazada requiere recorrerla?
+En una lista **simplemente enlazada** cada nodo solo conoce su `siguiente`, no su anterior. Aunque tengamos referencia directa a la `cola`, para eliminarla debemos hacer que el **penúltimo** nodo pase a ser la nueva cola y que su `siguiente` sea `null`. Pero el penúltimo no es accesible desde la cola (no hay enlace hacia atrás), así que la única forma de encontrarlo es recorrer desde la `cabeza` llevando un puntero `anterior` hasta que `actual === cola`. Por eso la eliminación de la cola cuesta **O(n)**. (En una lista doblemente enlazada, el penúltimo sería `cola.anterior` y podría hacerse en O(1).)

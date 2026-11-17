@@ -88,6 +88,88 @@ class ListaEnlazada {
     this.recorrer((dato) => datos.push(dato));
     return datos;
   }
+
+  /**
+   * Busca el primer dato que cumple la condición. O(n)
+   * @param {(dato: {fecha: string, motivo: string, veterinario: string, costo: number}) => boolean} condicion
+   * @returns {{fecha: string, motivo: string, veterinario: string, costo: number} | null}
+   */
+  buscar(condicion) {
+    let actual = this.cabeza;
+    while (actual !== null) {
+      if (condicion(actual.dato)) {
+        return actual.dato;
+      }
+      actual = actual.siguiente;
+    }
+    return null;
+  }
+
+  /**
+   * Inserta un dato después del primer nodo que cumpla la condición. O(n)
+   * Si el nodo encontrado es la cola, actualiza la cola.
+   * @param {(dato: {fecha: string, motivo: string, veterinario: string, costo: number}) => boolean} condicion
+   * @param {{fecha: string, motivo: string, veterinario: string, costo: number}} dato
+   * @returns {boolean} true si insertó, false si no encontró
+   */
+  insertarDespuesDe(condicion, dato) {
+    let actual = this.cabeza;
+    while (actual !== null) {
+      if (condicion(actual.dato)) {
+        const nuevo = new Nodo(dato);
+        nuevo.siguiente = actual.siguiente;
+        actual.siguiente = nuevo;
+        if (actual === this.cola) {
+          this.cola = nuevo;
+        }
+        this.tamanio += 1;
+        return true;
+      }
+      actual = actual.siguiente;
+    }
+    return false;
+  }
+
+  /**
+   * Elimina el primer nodo que cumpla la condición y devuelve su dato. O(n)
+   * @param {(dato: {fecha: string, motivo: string, veterinario: string, costo: number}) => boolean} condicion
+   * @returns {{fecha: string, motivo: string, veterinario: string, costo: number} | null}
+   */
+  eliminar(condicion) {
+    if (this.cabeza === null) {
+      return null;
+    }
+
+    // Caso: eliminar la cabeza
+    if (condicion(this.cabeza.dato)) {
+      const eliminado = this.cabeza.dato;
+      this.cabeza = this.cabeza.siguiente;
+      if (this.cabeza === null) {
+        this.cola = null; // era el único nodo
+      }
+      this.tamanio -= 1;
+      return eliminado;
+    }
+
+    // Caso: nodo intermedio o cola (se necesita anterior)
+    let anterior = this.cabeza;
+    let actual = this.cabeza.siguiente;
+    while (actual !== null) {
+      if (condicion(actual.dato)) {
+        const eliminado = actual.dato;
+        anterior.siguiente = actual.siguiente;
+        if (actual === this.cola) {
+          this.cola = anterior; // nueva cola
+        }
+        this.tamanio -= 1;
+        return eliminado;
+      }
+      anterior = actual;
+      actual = actual.siguiente;
+    }
+
+    return null;
+  }
 }
 
 module.exports = ListaEnlazada;
