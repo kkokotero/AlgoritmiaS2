@@ -1,6 +1,97 @@
+
+# ==============================
+# Dependencies
+# ==============================
 node_modules/
+.pnp/
+.pnp.cjs
+
+# ==============================
+# Package manager logs
+# ==============================
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.DS_Store
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==============================
+# Lock files (optional)
+# ==============================
+# Descomenta si realmente quieres ignorarlos.
+# *-lock.json
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# ==============================
+# Environment variables & secrets
+# ==============================
 .env
+.env.*
+!.env.example
+!.env.template
+
+# ==============================
+# Build output
+# ==============================
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+coverage/
+
+# ==============================
+# Cache
+# ==============================
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# ==============================
+# Operating systems
+# ==============================
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+Desktop.ini
+
+# ==============================
+# Editors & IDEs
+# ==============================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ==============================
+# Temporary files
+# ==============================
+tmp/
+temp/
+*.tmp
+*.bak
+*.log
+
+# ==============================
+# Testing
+# ==============================
+.nyc_output/
+playwright-report/
+test-results/
+
+# ==============================
+# Deployment
+# ==============================
+.vercel/
+.netlify/
+.serverless/
+.firebase/
+
