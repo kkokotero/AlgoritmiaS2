@@ -66,3 +66,34 @@ Llamada 1: contarServicios(Cirugías)
 
 ## Conclusión
 Las tres funciones resuelven el recorrido del árbol n-cario de categorías mediante recursión: cada llamada procesa un nodo y delega en sus hijos, combinando resultados (suma, impresión ordenada, máximo de niveles) sin asumir una profundidad fija.
+
+---
+
+## Día 3 (continuación): Búsquedas, rutas, paquetes y rangos
+
+### Implementación (`patitas/src/catalogo.js`)
+- `buscarServicio(categoria, nombre)`: busca en los servicios propios y, si no está, recurre en subcategorías con **retorno temprano** en cuanto encuentra (`return encontrado`), evitando recorrer el resto.
+- `rutaDeServicio(categoria, nombre)`: si el servicio está en la categoría devuelve `[categoria.nombre, servicio]`; si se halla en una subcategoría devuelve `[categoria.nombre, ...rutaSub]`; si no existe, `null`. Construcción de ruta con arreglos.
+- `sumarServicios(categoria)` (auxiliar recursiva): suma todos los precios del subárbol.
+- `precioPaquete(categoria)` (principal): obtiene el total con `sumarServicios` y aplica el **10% de descuento una sola vez al final** (`total * 0.9`), separando recursión de descuento.
+- `serviciosEnRango(categoria, min, max)`: acumula servicios propios en rango y concatena recursivamente los de subcategorías (cualquier nivel).
+
+### Pruebas realizadas
+- **Primer nivel:** `buscarServicio('Rabia')` → `{Rabia,45000}`; `rutaDeServicio('Rabia')` → `['Patitas','Vacunas','Rabia']`.
+- **Nivel más profundo:** `buscarServicio('Gata')` → `{Gata,280000}`; `rutaDeServicio('Gata')` → `['Patitas','Cirugías','Esterilización','Gata']`.
+- **Inexistente:** `buscarServicio('Peluquería')` → `null`; `rutaDeServicio('Peluquería')` → `null`.
+- **Paquete Cirugías:** servicios 280000+350000+150000 = **780000**, con 10% descuento una vez → **702000**. Vacunas 45000+85000=130000 → 117000.
+- **Rango [80000,150000] en catálogo:** 5 servicios → Consulta a domicilio (90000), Dermatología (110000), Cardiología (130000), Con anestesia (150000), Triple felina (85000). Rango inexistente [1000,2000] → `[]`.
+
+### Error común: aplicar el descuento en cada llamada recursiva (análisis)
+
+**Enfoque incorrecto (ejemplo):** que cada llamada haga `return sumaLocal * 0.9` (o descuente al combinar), aplicando 10% en cada nivel.
+
+**Cálculo con Cirugías (estructura):**
+- `Esterilización` (servicios 280000 y 350000, suma 630000, sin subsubcategorías): devolvería 630000*0.9 = **567000**.
+- `Limpieza dental` (150000): devolvería 150000*0.9 = **135000**.
+- `Cirugías` combinaría (567000 + 135000) * 0.9 = 702000 * 0.9 = **631800**.
+
+**Correcto:** sumar todo recursivamente (280000+350000+150000 = **780000**) y aplicar 10% **una sola vez** → 780000 * 0.9 = **702000**.
+
+**Por qué es incorrecto:** el descuento se compone por nivel (se descuenta 10% sobre valores ya descontados). Con n niveles de composición se aplicaría (0.9)^n, reduciendo el precio más de lo debido (631800 en vez de 702000, diferencia de 70200). La regla de negocio pide 10% sobre el total del paquete, no un descuento acumulado por rama/nivel. Por eso se separa la suma recursiva (`sumarServicios`) de la función principal que aplica el descuento una única vez (`precioPaquete`).
