@@ -10,6 +10,7 @@
     "explorar": "node src/explorar.js",
     "recurrentes": "node src/clientesRecurrentes.js",
     "combos": "node src/combosFrecuencias.js",
+    "ventanas": "node src/pruebasVentanas.js",
     "test": "node src/verificar.js && node src/depuracion.js"
   },
   "keywords": [],
