@@ -97,6 +97,41 @@ class ListaEnlazada {
   }
 
   /**
+   * Inserta un dato en la posición indicada (0 = inicio). O(n)
+   * @param {number} indice - Posición de inserción.
+   * @param {Atencion} dato - Dato a insertar.
+   * @returns {boolean} `true` si se insertó, `false` si el índice es inválido.
+   */
+  insertarEn(indice, dato) {
+    if (indice < 0 || indice > this.tamanio) {
+      return false;
+    }
+    if (indice === 0) {
+      this.agregarAlInicio(dato);
+      return true;
+    }
+    if (indice === this.tamanio) {
+      this.agregarAlFinal(dato);
+      return true;
+    }
+
+    let anterior = this.cabeza;
+    let i = 0;
+    while (anterior !== null && i < indice - 1) {
+      anterior = anterior.siguiente;
+      i += 1;
+    }
+    if (anterior === null) {
+      return false;
+    }
+    const nuevo = new Nodo(dato);
+    nuevo.siguiente = anterior.siguiente;
+    anterior.siguiente = nuevo;
+    this.tamanio += 1;
+    return true;
+  }
+
+  /**
    * Busca el primer dato que cumple la condición. O(n)
    * @param {(dato: {fecha: string, motivo: string, veterinario: string, costo: number}) => boolean} condicion
    * @returns {{fecha: string, motivo: string, veterinario: string, costo: number} | null}

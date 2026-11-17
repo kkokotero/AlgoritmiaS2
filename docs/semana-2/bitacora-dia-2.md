@@ -150,3 +150,47 @@ Generales: 58.75 minutos (235/4)
 | Nala | General | 8:40 | 10:00 | 80 | 10:00 | 80 | ✓ |
 
 **Resultado:** el programa coincide con el cálculo manual (orden, horas y promedios). No se detectaron errores; no fue necesaria corrección (no hay síntoma/hipótesis/corrección que documentar). Se verifica que ninguna mascota es atendida antes de llegar, ninguna general se atiende con urgencias esperando y dentro de cada tipo se respeta el orden de llegada.
+
+---
+
+## Día 2 (continuación): Pila (LIFO) y deshacer/rehacer
+
+### Contexto
+La recepcionista necesita deshacer la última acción y rehacer si deshizo de más. Regla: si después de deshacer se realiza una acción nueva, ya no se puede rehacer lo anterior.
+
+### Decisión de implementación de la Pila
+- **Implementación:** `patitas/src/Pila.js` construida con un **arreglo** interno (`_elementos`).
+- **Justificación:** una pila solo opera en el tope. `push` (apilar) y `pop` (desapilar) actúan sobre el final del arreglo en **O(1)** amortizado, sin desplazamientos de elementos ni asignación de nodos por operación, lo que resulta simple y eficiente. `verTope`, `estaVacia` y `tamanio` son accesos/lecturas directas **O(1)**. Una versión con nodos enlazados también sería O(1), pero añade mayor complejidad y sobrecarga de memoria por referencias; para el caso de uso (historial de acciones) el arreglo es la opción más clara. `vaciar()` reasigna en O(1).
+
+| Operación | Tiempo | Detalle |
+|---|---:|---|
+| `apilar` | O(1) | `push` al final |
+| `desapilar` | O(1) | `pop` del final, `null` si vacía |
+| `verTope` | O(1) | lectura del último índice |
+| `estaVacia` | O(1) | compara longitud |
+| `tamanio` | O(1) | retorna longitud |
+
+### Editor con dos pilas (`patitas/src/Editor.js`)
+- Envuelve `RegistroClinico` y mantiene `pilaDeshacer` y `pilaRehacer` (acciones reversibles).
+- `agregar(mascota, atencion)`: registra en el historial, apila acción `{tipo:"agregar", mascota, atencion}` en deshacer y **vacía rehacer**.
+- `eliminar(mascota, condicion)`: localiza índice, elimina la primera coincidencia y apila `{tipo:"eliminar", mascota, atencion, indice}` en deshacer y **vacía rehacer**.
+- `deshacer()`: desapila de deshacer y revierte (si fue agregar → elimina esa atención; si fue eliminar → reinserta en `indice` con `insertarEn`) y mueve la acción a rehacer. Devuelve `false` si no hay nada.
+- `rehacer()`: desapila de rehacer y reaplica la acción, moviéndola a deshacer. Devuelve `false` si no hay nada.
+- Se agregó `insertarEn(indice, dato)` en `ListaEnlazada` para restaurar eliminaciones en su posición original.
+
+### Traza de la secuencia (estado tras cada paso)
+Secuencia: (1) agregar A, (2) agregar B, (3) eliminar A, (4) deshacer, (5) deshacer, (6) rehacer, (7) agregar C, (8) rehacer.  
+Datos: A=`{01/01}`, B=`{02/02}`, C=`{03/03}` sobre mascota Lola. Pilas mostradas base → tope.
+
+| Paso | Acción | Historial Lola | Pila deshacer (base→tope) | Pila rehacer (base→tope) |
+|---:|---|---|---|---|
+| 1 | agregar A | `[01/01]` | `[agregar(Lola:01/01)]` | `[]` |
+| 2 | agregar B | `[01/01, 02/02]` | `[agregar(Lola:01/01), agregar(Lola:02/02)]` | `[]` |
+| 3 | eliminar A | `[02/02]` | `[agregar(Lola:01/01), agregar(Lola:02/02), eliminar(Lola:01/01@0)]` | `[]` |
+| 4 | deshacer | `[01/01, 02/02]` | `[agregar(Lola:01/01), agregar(Lola:02/02)]` | `[eliminar(Lola:01/01@0)]` |
+| 5 | deshacer | `[01/01]` | `[agregar(Lola:01/01)]` | `[eliminar(Lola:01/01@0), agregar(Lola:02/02)]` |
+| 6 | rehacer | `[01/01, 02/02]` | `[agregar(Lola:01/01), agregar(Lola:02/02)]` | `[eliminar(Lola:01/01@0)]` |
+| 7 | agregar C | `[01/01, 02/02, 03/03]` | `[agregar(Lola:01/01), agregar(Lola:02/02), agregar(Lola:03/03)]` | `[]` |
+| 8 | rehacer | `[01/01, 02/02, 03/03]` | `[agregar(Lola:01/01), agregar(Lola:02/02), agregar(Lola:03/03)]` | `[]` |
+
+**Verificaciones:** el historial coincide en cada paso; el paso 8 (`rehacer`) retorna `false` y no modifica nada (pila de rehacer vacía por la acción nueva del paso 7). `deshacer`/`rehacer` con pilas vacías no producen errores. Prueba: `node patitas/pruebas/editor.js`.
