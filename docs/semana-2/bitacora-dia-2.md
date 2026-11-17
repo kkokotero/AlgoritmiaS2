@@ -194,3 +194,32 @@ Datos: A=`{01/01}`, B=`{02/02}`, C=`{03/03}` sobre mascota Lola. Pilas mostradas
 | 8 | rehacer | `[01/01, 02/02, 03/03]` | `[agregar(Lola:01/01), agregar(Lola:02/02), agregar(Lola:03/03)]` | `[]` |
 
 **Verificaciones:** el historial coincide en cada paso; el paso 8 (`rehacer`) retorna `false` y no modifica nada (pila de rehacer vacía por la acción nueva del paso 7). `deshacer`/`rehacer` con pilas vacías no producen errores. Prueba: `node patitas/pruebas/editor.js`.
+
+---
+
+## Día 2 (cierre): Integración y motor Patitas v0.2
+
+### Integración completa
+- `patitas/src/simulacion.js` extendido: cada atención terminada se registra en el historial de la mascota a través de `Editor` (`RegistroClinico` + `ListaEnlazada`).
+- **Error simulado y corrección:** se registra por equivocación la atención de Toby en el historial de Max, se detecta, se corrige con `deshacer()` y luego se registra correctamente en Toby. (Ver salida de `node src/simulacion.js`).
+- Al final se muestra el reporte de atención (orden, horas, esperas, promedios) y los historiales actualizados de las mascotas atendidas (7 atenciones, cada una en su historial correcto).
+- **Validación de seguridad:** `Recepcion.llamarSiguienteSeguro()` — si la sala/espera está vacía muestra un aviso y devuelve `null` sin fallar (probado al final de la simulación).
+
+**Ejecución:** `node patitas/src/simulacion.js` → mañana completa sin errores, corrección aplicada y las 7 atenciones registradas correctamente.
+
+### Tabla de estructuras del motor
+
+| Estructura | Principio | Uso en Patitas | Operaciones principales y complejidad |
+|---|---|---|---|
+| `Nodo` | Secuencial (enlace) | Unidad básica que almacena `dato` y referencia `siguiente`; base de listas y colas enlazadas | Creación: O(1) tiempo/espacio |
+| `ListaEnlazada` | Secuencial (acceso por recorrido) | Historial cronológico de atenciones por mascota (insertar, buscar, eliminar, recorrer) | `agregarAlInicio/AlFinal`: O(1); `estaVacia/obtenerTamanio`: O(1); `recorrer/aArreglo`: O(n); `buscar/insertarDespuesDe/eliminar/insertarEn`: O(n); espacio O(n) |
+| `Cola` | **FIFO** (primero en entrar, primero en salir) | Filas de espera en recepción (urgencias y generales) | `encolar`: O(1); `desencolar`: O(1); `verFrente`: O(1); `estaVacia/tamanio`: O(1); espacio O(n) |
+| `Pila` | **LIFO** (último en entrar, primero en salir) | Historial de acciones para deshacer/rehacer | `apilar`: O(1) amort.; `desapilar`: O(1); `verTope`: O(1); `estaVacia/tamanio`: O(1); `vaciar`: O(1); espacio O(n) |
+| `Recepcion` | FIFO con prioridad (dos colas) | Gestiona llegadas: urgencias antes que generales, respetando orden de llegada en cada tipo | `registrarLlegada`: O(1); `llamarSiguiente/llamarSiguienteSeguro`: O(1); `hayEsperando`: O(1); espacio O(n) |
+| `RegistroClinico` | Índice (Map) + secuencial | Agrupa el historial (`ListaEnlazada`) de cada mascota | `registrarAtencion`: O(1) (amort. por `Map` + agregar al final); `obtenerHistorial/mascotas`: O(1)/O(m); espacio O(total atenciones) |
+| `Editor` | LIFO (dos pilas) sobre registro | Envuelve `RegistroClinico` para acciones reversibles (agregar/eliminar) con deshacer/rehacer | `agregar`: O(1)*; `eliminar`: O(n)*; `deshacer/rehacer`: O(1) en pilas (la operación inversa sobre la lista puede ser O(n)); `vaciar` rehacer en acción nueva: O(1). \*excluye costo de la operación subyacente en lista |
+
+*Nota:* las complejidades indicadas son de las operaciones de cada estructura; las operaciones compuestas heredan el costo de las estructuras que coordinan.
+
+### Versión
+- **v0.2**: integración de `Nodo`, `ListaEnlazada`, `Cola`, `Pila`, `RegistroClinico`, `Recepcion` y `Editor`; simulación completa de la mañana con política de urgencias, registro en historiales y corrección con deshacer.

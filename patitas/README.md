@@ -1,9 +1,13 @@
-# Patitas — Motor de historial clínico (v0.1)
+# Patitas — Motor de historial clínico (v0.2)
 
-Proyecto de la veterinaria **Patitas** para modelar y reportar historiales de atenciones clínicas usando una **lista enlazada**.
+Proyecto de la veterinaria **Patitas** para modelar historiales de atenciones, gestionar la recepción con prioridades y soportar correcciones con deshacer/rehacer, usando estructuras de datos enlazadas, colas y pilas.
 
 ## ¿Qué es este proyecto?
-Un motor que registra atenciones por mascota en orden cronológico, permite corregir el historial (buscar, insertar, eliminar) y genera un reporte por consola con historial, número de atenciones, costo total y última vacunación.
+Un motor que:
+- Registra atenciones por mascota en orden cronológico (lista enlazada).
+- Atiende la recepción con política de prioridad: **urgencias antes que generales**, respetando el orden de llegada en cada tipo (colas FIFO).
+- Permite corregir errores con **deshacer/rehacer** (pilas LIFO) sin perder consistencia.
+- Simula la mañana completa: reporte de atención (orden, horas, esperas, promedios) e historiales actualizados.
 
 ## Requisitos
 - [Node.js](https://nodejs.org/) >= 18
@@ -13,32 +17,42 @@ Un motor que registra atenciones por mascota en orden cronológico, permite corr
 Desde la carpeta `patitas/`:
 
 ```bash
-# Pruebas de nodos y recorridos (Día 1)
+# Pruebas Día 1
 node pruebas/nodos.js
-
-# Pruebas de lista enlazada (inserción O(1), 6 casos)
 node pruebas/lista.js
-
-# Pruebas de búsqueda/inserción intermedia/eliminación (casos borde)
 node pruebas/casosBorde.js
 
-# Reporte v0.1 (historiales de Lola, Toby y Mía)
+# Reporte de historiales base (v0.1)
 node src/reporte.js
+
+# Pruebas Día 2
+node pruebas/cola.js          # Cola FIFO + comparación push/shift (100.000)
+node pruebas/editor.js        # Deshacer/rehacer: traza de 8 pasos
+
+# Simulación integrada (v0.2): mañana del sábado
+node src/simulacion.js
 ```
 
-**Reporte esperado:** Lola $275.000 (3 atenciones), Toby $265.000 (3), Mía $280.000 (2) y última vacunación por mascota (o "sin registro").
+**`src/simulacion.js` (v0.2):** ejecuta la mañana completa sin errores; simula un registro erróneo corregido con deshacer; muestra reporte (orden, horas, esperas y promedios de urgencias/generales) e historiales actualizados de las 7 mascotas atendidas. Incluye validación segura al llamar con sala vacía.
 
 ## Estructuras y módulos
 | Módulo | Descripción |
 |---|---|
-| `src/Nodo.js` | Nodo de lista enlazada: `dato` (atención) y `siguiente`. |
-| `src/ListaEnlazada.js` | Lista con `cabeza`, `cola`, `tamanio`: inserción al inicio/fin O(1), `recorrer`, `aArreglo`, `buscar`, `insertarDespuesDe`, `eliminar`. |
-| `src/RegistroClinico.js` | Composición: índice (`Map`) de mascota → `ListaEnlazada`. `registrarAtencion` crea el historial si no existe y agrega al final. |
-| `src/reporte.js` | Carga datos de la clínica y genera el reporte (historial, conteo, total, última vacunación vía `buscar`). |
-| `pruebas/*.js` | Pruebas de nodos, lista y casos borde. |
+| `src/Nodo.js` | Nodo enlazado genérico: `dato` y `siguiente`. |
+| `src/ListaEnlazada.js` | Lista con `cabeza`, `cola`, `tamanio`: inserción O(1) en extremos, `recorrer`, `aArreglo`, `buscar`, `insertarDespuesDe`, `eliminar`, `insertarEn`. |
+| `src/RegistroClinico.js` | `Map` mascota → `ListaEnlazada` (historial por mascota). |
+| `src/Cola.js` | Cola FIFO con `frente`/`final`: `encolar`, `desencolar`, `verFrente` (O(1)). |
+| `src/Pila.js` | Pila LIFO (arreglo): `apilar`, `desapilar`, `verTope` (O(1)). |
+| `src/Recepcion.js` | Dos colas (urgencias/generales): `registrarLlegada`, `llamarSiguiente`, `llamarSiguienteSeguro`. |
+| `src/Editor.js` | Deshacer/rehacer sobre `RegistroClinico` con dos pilas de acciones reversibles. |
+| `src/reporte.js` | Reporte v0.1 de historiales base. |
+| `src/simulacion.js` | Simulación integrada v0.2 (recepción + atención + registro + corrección). |
+| `pruebas/*.js` | Pruebas de nodos, lista, casos borde, cola y editor. |
 
 ## Bitácora
-- `bitacora.md` (en `patitas/`) y documentación detallada en `docs/semana-2/bitacora-dia-1.md` (diagramas, casos borde, complejidades y tabla comparativa lista vs. arreglo).
+Documentación detallada (diagramas, trazas, complejidades y tablas) en:
+- [`docs/semana-2/bitacora-dia-1.md`](../docs/semana-2/bitacora-dia-1.md) — nodos, lista enlazada, casos borde y v0.1.
+- [`docs/semana-2/bitacora-dia-2.md`](../docs/semana-2/bitacora-dia-2.md) — cola, recepción/prioridad, simulación manual, pila, deshacer/rehacer, integración y tabla de estructuras (v0.2).
 
 ## Versión
-- **v0.1** — Registro clínico, historiales de varias mascotas y reporte por consola.
+- **v0.2** — Integración de colas, pilas y listas: simulación con prioridad de urgencias, registro en historiales y corrección con deshacer.

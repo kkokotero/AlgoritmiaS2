@@ -43,6 +43,19 @@ class Recepcion {
   }
 
   /**
+   * Intenta llamar al siguiente con validación de seguridad.
+   * Si la sala/cola de espera está vacía, muestra un mensaje y no falla.
+   * @returns {TurnoLlegada | null} Siguiente turno o `null` si no hay nadie esperando.
+   */
+  llamarSiguienteSeguro() {
+    if (!this.hayEsperando()) {
+      console.log("Aviso: no hay mascotas en espera (sala vacía). No se puede llamar al siguiente.");
+      return null;
+    }
+    return this.llamarSiguiente();
+  }
+
+  /**
    * Indica si hay turnos esperando en alguna cola.
    * @returns {boolean} `true` si hay alguien esperando.
    */
