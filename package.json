@@ -8,6 +8,7 @@
     "depuracion": "node src/depuracion.js",
     "verificar": "node src/verificar.js",
     "explorar": "node src/explorar.js",
+    "recurrentes": "node src/clientesRecurrentes.js",
     "test": "node src/verificar.js && node src/depuracion.js"
   },
   "keywords": [],

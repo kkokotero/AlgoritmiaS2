@@ -202,3 +202,48 @@ marca `¿Hay ciudades duplicadas? SÍ`, tal como se comprobó de forma aislada.
   archivo y creaba una dependencia circular entre `datos.js` y `analitica.js`.
 - El historial de ventas (`VENTAS`) se conserva sin modificar: los 12 registros originales
   siguen siendo la fuente de datos del reporte.
+
+---
+
+## Día 3 (optimización): Clientes recurrentes
+
+### 1. Entender
+- **Entradas:** `ventas` (arreglo de objetos venta con `cliente`).
+- **Salidas:** clientes que compraron más de una vez (recurrentes). La versión original/Map devuelve arreglo de códigos; la versión Set devuelve un `Set`.
+- **Restricciones:** responder en < 1 s con 100.000 ventas; resultados equivalentes entre versiones (comparando ordenados, ya que Set/Map no garantizan orden de inserción relevante para el negocio).
+
+### 2. Ejemplos y casos borde
+- Datos Día 1 (`VENTAS`): recurrentes `C01`, `C02`, `C03` (aparecen más de una vez).
+- Arreglo vacío: `[]` / `Set` vacío.
+- Sin repetidos: ninguno recurrente.
+- Todos iguales: un único cliente recurrente.
+- 5.000 ventas generadas (`C(i % 2000)`): muchos clientes con múltiples compras.
+
+### 3. Fuerza bruta y complejidad
+- `clientesRecurrentes(ventas)`: para cada cliente busca otra aparición hacia adelante con doble ciclo.
+- **Tiempo:** O(n²) en el peor caso (comparaciones y búsquedas repetidas, además de `includes` sobre el acumulado).
+- **Espacio:** O(k) para la lista de recurrentes (k clientes distintos recurrentes).
+
+### 4. Idea de optimización
+Eliminar el trabajo repetido recordando lo ya visto:
+- **Set:** un `Set` de clientes vistos y otro de recurrentes. Cada consulta `has/add` es O(1) promedio → recorrido único O(n).
+- **Map:** contar compras por cliente en un `Map` (`set/get` O(1) promedio) y filtrar los que tienen conteo > 1 → O(n).
+
+### 5. Implementación
+- `clientesRecurrentes(ventas)` — fuerza bruta (original).
+- `clientesRecurrentesSet(ventas)` — `Set` de vistos + `Set` de recurrentes.
+- `comprasPorCliente(ventas)` — `Map` cliente→conteo, devuelve arreglo de recurrentes.
+
+### 6. Pruebas y medición
+Verificación: las tres versiones devuelven los mismos clientes (ordenados) con los datos del Día 1 y con 5.000 ventas generadas (`node src/clientesRecurrentes.js`).
+
+| Ventas | Original (fuerza bruta) | Set | Map |
+|-------:|------------------------:|----:|----:|
+| 1.000 | 3.078 ms | 0.236 ms | 0.255 ms |
+| 10.000 | 288.182 ms | 1.130 ms | 1.195 ms |
+| 100.000 | omitida (no razonable) | 13.877 ms | 7.711 ms |
+
+La original crece de forma cuadrática (al multiplicar n×10 el tiempo crece ~×100), mientras Set/Map crecen aproximadamente lineal con n y procesan 100.000 ventas muy por debajo de 1 segundo.
+
+### Intercambio tiempo-memoria
+Las versiones optimizadas cambian tiempo por memoria: mantienen estructuras auxiliares proporcionales al número de clientes distintos. Si hay `n` ventas y hasta `n` clientes distintos, el costo en memoria es **O(n)** (Sets/Map almacenan claves/conteos). La fuerza bruta usa menos memoria auxiliar O(k) para el resultado, pero paga con tiempo O(n²); para 100.000 ventas la optimización es necesaria para cumplir el requisito de < 1 s.

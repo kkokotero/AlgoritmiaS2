@@ -487,10 +487,81 @@ function formatearMoneda(moneda) {
   });
 }
 
+/**
+ * Devuelve los clientes que aparecen más de una vez (fuerza bruta, O(n^2)).
+ *
+ * @param {import('./datos.js').Venta[]} ventas - Ventas a analizar.
+ * @returns {string[]} Códigos de clientes recurrentes (sin duplicados).
+ */
+function clientesRecurrentes(ventas) {
+  const recurrentes = [];
+
+  for (let i = 0; i < ventas.length; i++) {
+    const cliente = ventas[i].cliente;
+    if (recurrentes.includes(cliente)) {
+      continue;
+    }
+
+    for (let j = i + 1; j < ventas.length; j++) {
+      if (ventas[j].cliente === cliente) {
+        recurrentes.push(cliente);
+        break;
+      }
+    }
+  }
+
+  return recurrentes;
+}
+
+/**
+ * Devuelve los clientes recurrentes usando Sets (tiempo O(n), espacio O(n)).
+ *
+ * @param {import('./datos.js').Venta[]} ventas - Ventas a analizar.
+ * @returns {Set<string>} Códigos de clientes recurrentes.
+ */
+function clientesRecurrentesSet(ventas) {
+  const clientes = new Set();
+  const recurrentes = new Set();
+
+  for (const venta of ventas) {
+    const cliente = venta.cliente;
+
+    if (clientes.has(cliente)) {
+      recurrentes.add(cliente);
+    } else {
+      clientes.add(cliente);
+    }
+  }
+
+  return recurrentes;
+}
+
+/**
+ * Cuenta compras por cliente y devuelve los recurrentes (tiempo O(n), espacio O(n)).
+ *
+ * @param {import('./datos.js').Venta[]} ventas - Ventas a analizar.
+ * @returns {string[]} Códigos de clientes recurrentes.
+ */
+function comprasPorCliente(ventas) {
+  const compras = new Map();
+
+  for (const venta of ventas) {
+    const cliente = venta.cliente;
+    compras.set(cliente, (compras.get(cliente) || 0) + 1);
+  }
+
+  return Array.from(compras.entries())
+    .filter(([, count]) => count > 1)
+    .map(([cliente]) => cliente);
+}
+
 module.exports = {
   claveCiudad,
   claveDia,
   claveProducto,
+  clientesRecurrentes,
+  clientesRecurrentesSet,
+  comprasPorCliente,
   fechasConVentas,
   formatearMoneda,
   formatearNumero,
