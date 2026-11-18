@@ -121,3 +121,120 @@ Monto a corregir: $6000
 
 **Fortaleza:** recorrido (traza) detallado que evidencia corrección y manejo del caso no duplicado por diferencia de minuto.  
 **Oportunidad de mejora:** en una entrevista real, verbalizar más temprano alternativas de clave (p. ej. tupla/serialización) y confirmar el separador para evitar colisiones hipotéticas de formato.
+
+---
+
+# Segundo simulacro — Demanda: hora pico y estaciones más usadas
+
+**Proyecto:** `ruta-paisa-planificador` — Reto `src/retos/demanda.js`
+
+## Contexto
+Segunda entrevista (nivel intermedio). Operaciones quiere programar más trenes en los momentos de mayor demanda.
+- Dato: validaciones de toda la red, minuto a minuto, entre las 6:00 y las 6:19:  
+  `const porMinuto = [120, 135, 150, 180, 210, 260, 310, 340, 330, 300, 280, 250, 240, 260, 290, 320, 350, 360, 310, 270];`
+- Pregunta 1: “¿Cuáles son los 5 minutos consecutivos con más validaciones?” → `horaPico(porMinuto, k)`.
+- Pregunta 2: “Con el registro de validaciones del día, ¿cuáles son las tres estaciones más usadas?” → generar 50.000 validaciones con estaciones al azar de la red e implementar `estacionesMasUsadas(validaciones, k)`.
+
+**Esperado:** `horaPico(porMinuto, 5)` → ventana que inicia a las **6:14** con **1.630** validaciones. Ventana deslizante en un solo recorrido. `estacionesMasUsadas` devuelve tres estaciones con sus conteos y complejidad justificada. Alternativa para obtener solo las tres primeras explicada con complejidad.
+
+## Protocolo de resolución en voz alta
+
+### 1) Señales del enunciado (identificación)
+- **“minutos consecutivos”** → sugiere **ventana deslizante** de tamaño fijo `k` (subarreglo contiguo).
+- **“más usadas”** → sugiere **conteo de frecuencias** (histograma por estación) con un `Map`, y luego seleccionar las mayores.
+
+### 2) Restricciones y preguntas
+- `porMinuto`: n valores (20 en el ejemplo) desde 6:00 (índice 0 = 6:00). `k` fijo (5). Se requiere inicio en formato `6:mm` y total de la ventana.
+- Registro del día: 50.000 validaciones con estaciones al azar de la red (códigos de la red del grafo). Se piden las 3 más usadas con sus conteos.
+- Escala: solución debe ser eficiente; la ventana no debe recalcular sumas desde cero en cada posición.
+
+### 3) Ejemplos y casos borde
+- Ejemplo: ventana máxima de 5 es índices 14–18 → 290+320+350+360+310 = **1630**, inicio **6:14**.
+- Borde: `k <= 0` o arreglo vacío → total 0; `k > n` → tomar ventana de tamaño `n`; empates → se conserva la primera ventana máxima encontrada.
+
+### 4) `horaPico`: fuerza bruta vs ventana deslizante
+- **Fuerza bruta:** para cada inicio posible calcular la suma de los `k` elementos → O(n·k) tiempo.
+- **Optimización (ventana deslizante):** calcular la suma de la primera ventana `[0,k)`; luego deslizar una posición: `suma = suma - sale + entra`. Cada elemento entra y sale a lo sumo una vez → **un solo recorrido O(n)** tiempo y **O(1)** espacio adicional.
+- Conversión de índice a hora: índice `i` → `6:${mm}` con `mm` de dos dígitos.
+
+**Traza (k=5):**
+| Paso | Ventana (índices) | Minutos | Suma | Máximo |
+|---:|---|---|---:|---|
+| inicial | 0–4 | 6:00–6:04 | 120+135+150+180+210 = **795** | 795 (inicio 0) |
+| i=5  | 1–5  | 6:01–6:05 | 795-120+260 = 935 | 935 (1) |
+| i=6  | 2–6  | 6:02–6:06 | 935-135+310 = 1110 | 1110 (2) |
+| i=7  | 3–7  | 6:03–6:07 | 1110-150+340 = 1300 | 1300 (3) |
+| i=8  | 4–8  | 6:04–6:08 | 1300-180+330 = 1450 | 1450 (4) |
+| i=9  | 5–9  | 6:05–6:09 | 1450-210+300 = 1540 | 1540 (5) |
+| i=10 | 6–10 | 6:06–6:10 | 1540-260+280 = 1560 | 1560 (6) |
+| i=11 | 7–11 | 6:07–6:11 | 1560-310+250 = 1500 | 1560 (6) |
+| i=12 | 8–12 | 6:08–6:12 | 1500-340+240 = 1400 | 1560 (6) |
+| i=13 | 9–13 | 6:09–6:13 | 1400-330+260 = 1330 | 1560 (6) |
+| i=14 | 10–14| 6:10–6:14 | 1330-300+290 = 1320 | 1560 (6) |
+| i=15 | 11–15| 6:11–6:15 | 1320-280+320 = 1360 | 1560 (6) |
+| i=16 | 12–16| 6:12–6:16 | 1360-250+350 = 1460 | 1560 (6) |
+| i=17 | 13–17| 6:13–6:17 | 1460-240+360 = 1580 | 1580 (13) |
+| i=18 | 14–18| 6:14–6:18 | 1580-260+310 = **1630** | **1630 (inicio 14 → 6:14)** |
+| i=19 | 15–19| 6:15–6:19 | 1630-290+270 = 1610 | 1630 (14) |
+
+Resultado: inicio **6:14**, total **1630**.
+
+### 5) `estacionesMasUsadas`: conteo y complejidad
+- **Conteo de frecuencias:** recorrer las `n` validaciones y acumular en `Map<estacion, conteo>` (`get`/`set` O(1) promedio) → **O(n)**.
+- **Ordenamiento de entradas:** convertir a arreglo y ordenar por conteo descendente → **O(u log u)**, con `u` = estaciones distintas.
+- **Tomar k:** `slice(0,k)` → O(k).
+- **Total:** **O(n + u log u)** tiempo, **O(u)** espacio (Map + arreglo de entradas).
+
+Implementación: genera 50.000 validaciones con estaciones al azar tomadas de `construirGrafoRed().adyacencia.keys()` y devuelve el top 3 con sus conteos (los conteos varían por aleatoriedad, la lógica y complejidad se mantienen).
+
+### 6) Alternativa si solo se necesitaran las tres primeras (sin ordenar todas)
+- **Mantener un top-k fijo en una pasada:** tras construir el conteo O(n), recorrer las `u` entradas del `Map` manteniendo las 3 mayores (comparaciones constantes por entrada) → **O(n + u)** tiempo, **O(u)** espacio. Para `k=3` es lineal en `u` y evita el `log u` del ordenamiento total.
+- **Min-heap de tamaño k:** insertar/actualizar entradas en un heap mínimo limitado a `k` elementos: O(log k) por entrada → **O(n + u log k)** tiempo, **O(u)** espacio. Con `k=3`, `log k` es constante, equivalente en orden a **O(n + u)**. Ventaja: escala bien si `k` crece pero sigue siendo `k << u`.
+
+### 7) Pistas progresivas (registro)
+- **Pistas usadas:** **0**. El candidato identificó las señales (“minutos consecutivos” → ventana deslizante, “más usadas” → frecuencias/Map), planteó la optimización y las complejidades sin bloquearse más de tres minutos. El entrevistador no requirió entregar pistas progresivas.
+
+### Verificación
+Ejecución: `node ruta-paisa-planificador/src/retos/demanda.js`
+```
+-- Hora pico (ventana deslizante, k=5) --
+Ventana con más validaciones: inicia a las 6:14, total 1630 validaciones (índice inicio 14).
+-- Estaciones más usadas (50.000 validaciones, top 3) --
+1. Estación <código>: <conteo> validaciones (varía por aleatoriedad)
+2. Estación <código>: <conteo> validaciones
+3. Estación <código>: <conteo> validaciones
+Complejidad estacionesMasUsadas: O(n + u log u) tiempo y O(u) espacio...
+Alternativa: mantener top-3 en una pasada O(n+u) o min-heap de tamaño k O(n + u log k).
+```
+`horaPico(porMinuto, 5)` = **6:14, 1630** (un recorrido). `node --check` sin errores.
+
+---
+
+## Evaluación de rúbrica — Segundo simulacro
+
+> Rúbrica: comprensión, diseño, corrección, complejidad y comunicación. Pistas progresivas registradas.
+
+### Evaluación recibida como candidato
+| Criterio | Nivel | Observación |
+|---|---|---|
+| Comprensión | Cumple | Identificó correctamente las señales del enunciado: “minutos consecutivos” → ventana deslizante y “más usadas” → conteo de frecuencias. Aclaró formato de hora y alcance del registro. |
+| Diseño | Cumple | Propuso ventana deslizante (actualización por resta/suma) frente a recomputar sumas; usó `Map` para frecuencias y ordenamiento de entradas para el top-k. |
+| Corrección | Cumple | `horaPico(porMinuto,5)` devuelve 6:14 y 1630; `estacionesMasUsadas` genera 50.000 validaciones y retorna 3 estaciones con conteos. |
+| Complejidad | Cumple | Justificó O(n) y recorrido único en `horaPico`, y O(n + u log u) / O(u) en `estacionesMasUsadas`; explicó alternativa O(n+u) u O(n + u log k) para solo las tres primeras. |
+| Comunicación | Cumple | Comunicó señales, decisiones y trazó la ventana deslizante en voz alta; cerró con complejidades y alternativa. |
+
+**Pistas progresivas usadas:** 0.  
+**Fortaleza:** mapeo rápido de palabras clave del problema a técnicas (ventana deslizante / hashing-frecuencias) y comparación de enfoques con complejidad.  
+**Oportunidad de mejora:** mencionar explícitamente el manejo de empates y validar entradas (k, arreglos vacíos) al inicio de la explicación.
+
+### Autoevaluación
+| Criterio | Nivel | Evidencia / reflexión |
+|---|---|---|
+| Comprensión | Cumple | Señales identificadas y traducidas a estructuras/algoritmos adecuados; alcance de n, u, k aclarado. |
+| Diseño | Cumple | Ventana deslizante de tamaño fijo con actualización incremental y `Map` + ordenamiento de entradas, coherente con lo solicitado. |
+| Corrección | Cumple | Resultado esperado verificado (6:14, 1630); generación de 50.000 registros y top 3 funcional; `node --check` correcto. |
+| Complejidad | Cumple | Análisis fuerza bruta O(n·k) vs O(n) y justificación O(n + u log u); alternativa top-k sin ordenar todo explicada (O(n+u) / O(n + u log k)). |
+| Comunicación | Cumple | Traza tabulada de la ventana, explicación de decisiones y registro explícito de pistas (0). |
+
+**Fortaleza:** traza completa que evidencia el recorrido único y la actualización constante de la ventana.  
+**Oportunidad de mejora:** en contexto real, discutir costo práctico de `Math.random`/distribución y, si aplica, estabilidad o criterio de desempate en el top.
