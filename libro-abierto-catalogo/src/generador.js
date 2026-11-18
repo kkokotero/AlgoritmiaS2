@@ -109,4 +109,24 @@ function generarCatalogo(n, opciones) {
   return catalogo;
 }
 
-module.exports = { generarCatalogo };
+/**
+ * Devuelve un catálogo ordenado por año con unos pocos libros fuera de lugar al final.
+ * @param {number} n - Cantidad de libros.
+ * @param {number} cambios - Cantidad de libros a dejar fuera de lugar al final.
+ * @returns {{isbn: string, titulo: string, autor: string, anio: number, prestamos: number}[]} Catálogo casi ordenado.
+ */
+function casiOrdenado(n, cambios) {
+  const catalogo = generarCatalogo(n);
+  catalogo.sort((a, b) => a.anio - b.anio);
+  const k = Math.min(Math.max(0, cambios), Math.floor(n / 2));
+  for (let i = 0; i < k; i++) {
+    const idxFinal = n - 1 - i;
+    const idxOtro = Math.floor(Math.random() * (n - k));
+    const temp = catalogo[idxFinal];
+    catalogo[idxFinal] = catalogo[idxOtro];
+    catalogo[idxOtro] = temp;
+  }
+  return catalogo;
+}
+
+module.exports = { generarCatalogo, casiOrdenado };

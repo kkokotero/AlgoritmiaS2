@@ -7,6 +7,7 @@
     "explorar": "node src/explorar.js",
     "busqueda": "node src/medirBusqueda.js",
     "binaria": "node src/comparacionBinaria.js",
+    "ordenamiento": "node src/medirOrdenamiento.js",
     "catalogo": "node src/catalogo.js",
     "start": "node src/catalogo.js"
   },
