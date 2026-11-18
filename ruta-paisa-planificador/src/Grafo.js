@@ -21,12 +21,13 @@ class Grafo {
 
   /**
    * Conecta dos estaciones en ambos sentidos (arista no dirigida).
-   * No duplica vecinos si la conexión ya existe.
+   * No duplica vecinos si la conexión ya existe. Guarda la línea de la conexión.
    * @param {number} a - Código de la primera estación.
    * @param {number} b - Código de la segunda estación.
+   * @param {string | null} [linea=null] - Línea a la que pertenece la conexión.
    * @returns {void}
    */
-  conectar(a, b) {
+  conectar(a, b, linea = null) {
     this.agregarEstacion(a);
     this.agregarEstacion(b);
 
@@ -34,22 +35,60 @@ class Grafo {
     const vecinosB = this.adyacencia.get(b);
     if (!vecinosA || !vecinosB) return;
 
-    if (vecinosA.indexOf(b) === -1) {
-      vecinosA.push(b);
+    let existeAB = false;
+    for (const v of vecinosA) {
+      if (v.codigo === b) { existeAB = true; break; }
     }
-    if (vecinosB.indexOf(a) === -1) {
-      vecinosB.push(a);
+    if (!existeAB) {
+      vecinosA.push({ codigo: b, linea: linea });
+    }
+
+    let existeBA = false;
+    for (const v of vecinosB) {
+      if (v.codigo === a) { existeBA = true; break; }
+    }
+    if (!existeBA) {
+      vecinosB.push({ codigo: a, linea: linea });
     }
   }
 
   /**
-   * Devuelve los vecinos (adyacentes) de una estación.
+   * Devuelve los vecinos (adyacentes) de una estación como códigos.
    * @param {number} codigo - Código de la estación.
    * @returns {number[]} Arreglo de códigos vecinos.
    */
   vecinos(codigo) {
     const lista = this.adyacencia.get(codigo);
-    return lista ? lista.slice() : [];
+    if (!lista) return [];
+    const res = [];
+    for (const v of lista) res.push(v.codigo);
+    return res;
+  }
+
+  /**
+   * Devuelve los vecinos con la línea de cada conexión.
+   * @param {number} codigo - Código de la estación.
+   * @returns {{codigo:number, linea:string|null}[]} Vecinos con línea.
+   */
+  vecinosConLinea(codigo) {
+    const lista = this.adyacencia.get(codigo);
+    if (!lista) return [];
+    return lista.map((v) => ({ codigo: v.codigo, linea: v.linea }));
+  }
+
+  /**
+   * Obtiene la línea de la conexión directa entre a y b, si existe.
+   * @param {number} a
+   * @param {number} b
+   * @returns {string|null}
+   */
+  obtenerLineaConexion(a, b) {
+    const lista = this.adyacencia.get(a);
+    if (!lista) return null;
+    for (const v of lista) {
+      if (v.codigo === b) return v.linea;
+    }
+    return null;
   }
 
   /**
@@ -104,7 +143,8 @@ class Grafo {
       visitados.add(actual);
       resultado.push(actual);
       const ady = this.adyacencia.get(actual) || [];
-      for (const vecino of ady) {
+      for (const v of ady) {
+        const vecino = v.codigo;
         if (!visitados.has(vecino) && !cerr.has(vecino)) {
           visitar(vecino);
         }
@@ -144,7 +184,7 @@ class Grafo {
       const ady = this.adyacencia.get(actual) || [];
       // Apilar en orden inverso para visitar en el mismo orden que la lista de adyacencia
       for (let i = ady.length - 1; i >= 0; i--) {
-        const vecino = ady[i];
+        const vecino = ady[i].codigo;
         if (!visitados.has(vecino) && !cerr.has(vecino)) {
           pila.push(vecino);
         }
@@ -186,7 +226,8 @@ class Grafo {
         visitadosGlobal.add(actual);
         componente.push(actual);
         const ady = this.adyacencia.get(actual) || [];
-        for (const vecino of ady) {
+        for (const v of ady) {
+          const vecino = v.codigo;
           if (!visitadosComp.has(vecino) && !cerr.has(vecino)) {
             pila.push(vecino);
           }
@@ -199,6 +240,63 @@ class Grafo {
     }
 
     return grupos;
+  }
+
+  /**
+   * Recorrido en anchura (BFS) para encontrar la ruta con menor número de tramos.
+   * @param {number} origen - Código de estación origen.
+   * @param {number} destino - Código de estación destino.
+   * @param {Set<number>} [cerradas] - Estaciones cerradas (no transitables).
+   * @returns {number[] | null} Camino de códigos desde origen a destino, o null si no existe.
+   */
+  bfs(origen, destino, cerradas) {
+    const cerr = cerradas || new Set();
+
+    if (!this.adyacencia.has(origen) || !this.adyacencia.has(destino)) return null;
+    if (cerr.has(origen) || cerr.has(destino)) return null;
+    if (origen === destino) return [origen];
+
+    /** @type {Set<number>} */
+    const visitados = new Set([origen]);
+    /** @type {Map<number, number>} */
+    const padre = new Map();
+    /** @type {number[]} */
+    const cola = [origen];
+    let cabeza = 0;
+    let encontrado = false;
+
+    while (cabeza < cola.length) {
+      const actual = cola[cabeza++];
+      const ady = this.adyacencia.get(actual) || [];
+      for (const v of ady) {
+        const vecino = v.codigo;
+        if (visitados.has(vecino) || cerr.has(vecino)) continue;
+        visitados.add(vecino);
+        padre.set(vecino, actual);
+        if (vecino === destino) {
+          encontrado = true;
+          break;
+        }
+        cola.push(vecino);
+      }
+      if (encontrado) break;
+    }
+
+    if (!encontrado) return null;
+
+    // Reconstruir camino desde destino hacia origen
+    /** @type {number[]} */
+    const camino = [];
+    let actual = destino;
+    while (actual !== undefined) {
+      camino.push(actual);
+      if (actual === origen) break;
+      const p = padre.get(actual);
+      if (p === undefined) break;
+      actual = p;
+    }
+    camino.reverse();
+    return camino;
   }
 }
 

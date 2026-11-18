@@ -30,7 +30,7 @@ function construirGrafoRed() {
       grafo.agregarEstacion(linea.estaciones[i]);
     }
     for (let i = 0; i < linea.estaciones.length - 1; i++) {
-      grafo.conectar(linea.estaciones[i], linea.estaciones[i + 1]);
+      grafo.conectar(linea.estaciones[i], linea.estaciones[i + 1], linea.nombre);
     }
   }
 
@@ -52,7 +52,8 @@ if (require.main === module) {
     if (vecinos.length > 2) {
       const res = indice.buscar(codigo);
       const nombre = res ? res.estacion : String(codigo);
-      console.log(`${nombre} (código ${codigo}) - grado ${vecinos.length}, vecinos: [${vecinos.join(", ")}]`);
+      const codigosVecinos = vecinos.map((v) => v.codigo);
+      console.log(`${nombre} (código ${codigo}) - grado ${vecinos.length}, vecinos: [${codigosVecinos.join(", ")}]`);
     }
   }
 
@@ -60,7 +61,8 @@ if (require.main === module) {
   for (const [codigo, vecinos] of grafo.adyacencia.entries()) {
     const res = indice.buscar(codigo);
     const nombre = res ? res.estacion : String(codigo);
-    console.log(`${codigo} (${nombre}): [${vecinos.join(", ")}]`);
+    const codigosVecinos = vecinos.map((v) => v.codigo);
+    console.log(`${codigo} (${nombre}): [${codigosVecinos.join(", ")}]`);
   }
 }
 

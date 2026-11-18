@@ -164,3 +164,64 @@ Se cerró una estación a la vez (todas las demás operativas) y se contaron los
 | Itagüí (80) | 2 | {La Estrella(90)} aislada (terminal de la línea A). |
 
 Estas estaciones son puntos de articulación/cortes de la red piloto: su cierre (grado efectivo de conexión único entre subredes o nodos terminales encadenados) desconecta componentes, por lo que requieren planes de contingencia (buses de apoyo) ante cierres.
+
+---
+
+## Planificador de viajes v0.2 (BFS, rutas y transbordos)
+
+### Integración (`src/planificador.js`)
+Planificador ejecutable desde la terminal: `node src/planificador.js <origen> <destino> [--cerradas cod1,cod2,...]` (usa `process.argv`).
+
+- **Validación:** los códigos de origen y destino se validan con `buscar` del **índice ABB** (`ArbolBusqueda` del Día 1). Si algún código no existe se muestra un mensaje claro y no se produce un error no controlado. También se informa si origen/destino están cerrados.
+- **Cálculo de ruta:** `Grafo.bfs(origen, destino, cerradas)` usa una **cola** y un `Map` de padres para encontrar la ruta con menor número de tramos, ignorando estaciones en el `Set` de cerradas. Reconstruye el camino destino→origen.
+- **Líneas y transbordos:** cada conexión se etiqueta con su línea al construir el grafo (`conectar(a,b,linea)` en `red.js`). Se detectan transbordos comparando la línea de cada tramo con la del anterior e indicando la estación de cambio (p. ej. Línea A → Línea T).
+- **Cierres:** con `--cerradas` se recalcula la ruta evitando esas estaciones; si no hay camino se informa **viaje imposible** con sugerencia de alternativa.
+
+### Ejemplos de ejecución
+
+**Ruta 10 → 59 (con nombres, paradas y transbordos):**
+`node src/planificador.js 10 59`
+- Ruta: Niquía(10) → Bello(20) → Caribe(30) → Universidad(35) → Hospital(40) [Transbordo A→T] → Estadio(56) [Transbordo T→B] → Floresta(58) → San Javier(59)
+- Total de paradas (tramos): 7. Estaciones en el recorrido: 8. Transbordos: 2 (en Hospital: A a T; en Estadio: T a B).
+
+**Código inexistente:** `node src/planificador.js 10 999` → `No se encontró la estación de destino con código 999. Verifique el código e intente de nuevo.`
+
+**Con cierre que impide el viaje:** `node src/planificador.js 10 59 --cerradas 56` → `Viaje imposible: no hay ruta disponible... con las estaciones cerradas indicadas` (Floresta y San Javier quedan desconectadas por el cierre de Estadio).
+
+**Con cierre que no bloquea la ruta:** `node src/planificador.js 10 59 --cerradas 50` → la ruta sigue disponible (San Antonio no está en el camino mínimo 10→59) y se muestra la misma ruta con transbordos.
+
+### Traza BFS (ruta 10 → 59, sin cierres)
+BFS explora por niveles usando **cola** (FIFO), `visitados` (Set) y `padre` (Map) para reconstruir el camino. Objetivo: encontrar 59 con el menor número de tramos.
+
+| Paso | Dequeue (actual) | Vecinos considerados (no visitados) | Enqueue / padre | Cola (frente→fondo) | visitados |
+|---:|---:|---|---|---|---|
+| 0 | — | inicio 10 | padre(10)=— | [10] | {10} |
+| 1 | 10 | 20 | padre(20)=10 | [20] | {10,20} |
+| 2 | 20 | 10(vis), 30 | padre(30)=20 | [30] | {10,20,30} |
+| 3 | 30 | 20(vis), 35, 25 | padre(35)=30, padre(25)=30 | [35,25] | {10,20,30,35,25} |
+| 4 | 35 | 30(vis), 40 | padre(40)=35 | [25,40] | {10,20,30,35,25,40} |
+| 5 | 25 | 30(vis), 27 | padre(27)=25 | [40,27] | {10,20,30,35,25,40,27} |
+| 6 | 40 | 35(vis), 45, 56 | padre(45)=40, padre(56)=40 | [27,45,56] | {… ,40,27,45,56} |
+| 7 | 27 | 25(vis), 29 | padre(29)=27 | [45,56,29] | {… ,27,45,56,29} |
+| 8 | 45 | 40(vis), 50 | padre(50)=45 | [56,29,50] | {… ,45,56,29,50} |
+| 9 | 56 | 54(vis en paso sig? no, 54 libre), 58, 40(vis), 65 | padre(54)=56, padre(58)=56, padre(65)=56 | [29,50,54,58,65] | {… ,56,54,58,65} |
+| 10 | 29 | 27(vis) | — | [50,54,58,65] | — |
+| 11 | 50 | 45(vis), 60, 52 | padre(60)=50, padre(52)=50 | [54,58,65,60,52] | {… ,50,60,52} |
+| 12 | 54 | 52,56(vis) → 52 ya visitado? (52 visitado en 11) | — | [58,65,60,52] | — |
+| 13 | 58 | 56(vis), 59 | padre(59)=58 → **destino encontrado**, se detiene | — | {… ,58,59} |
+
+**Reconstrucción (siguiendo `padre` desde 59):** 59←58←56←40←35←30←20←10 ⇒ camino **[10,20,30,35,40,56,58,59]** (7 tramos). BFS garantiza el mínimo número de aristas en grafo no ponderado. Las líneas por tramo son A,A,A,A,T,B,B, por lo que hay transbordos en 40 (A→T) y 56 (T→B).
+
+### Tabla de estructuras del planificador
+
+| Estructura | Dónde se usa en el planificador | Para qué se usa | Operación principal y complejidad |
+|---|---|---|---|
+| **Árbol general (`NodoArbol`)** | Modelo de la red jerárquica (red→líneas→estaciones→servicios, `redArbol.js`) | Representar la jerarquía de la red y soportar recorridos recursivos descriptivos | Recorridos/consultas recursivas sobre n nodos: **O(n)** tiempo, **O(h)** pila |
+| **Árbol binario de búsqueda (`ArbolBusqueda`, `NodoBinario`)** | Índice de estaciones por código (`indice.js`), validación de códigos en `planificador.js` | Traducir/validar códigos a nombres y consultas por clave (búsqueda, mín/máx, rango) | `buscar`/`insertar`: **O(log n)** promedio, **O(n)** peor caso (degenerado); `minimo`/`maximo`: **O(h)** |
+| **Grafo (`Grafo`, lista de adyacencia `Map`)** | Red de conexiones (`red.js`, `Grafo.js`) para rutas y cierres | Modelar estaciones (vértices) y conexiones con línea (aristas) para DFS/BFS/componentes | `bfs`/`dfs`/`componentes`: **O(V+E)** tiempo, **O(V)** espacio; consultar vecinos: **O(grado(v))** |
+| **Cola** | `bfs` en `Grafo` (arreglo con índice cabeza) | Explorar por niveles (FIFO) y hallar ruta con menos tramos | `enqueue`/`dequeue`: **O(1)** amortizado |
+| **Pila** | `dfsIterativo`, `componentes` y pila de llamadas de DFS recursivo | Explorar en profundidad (LIFO) y backtracking | `push`/`pop`: **O(1)** |
+| **Set** | `visitados` en DFS/BFS, `cerradas` (cierres/parámetro `--cerradas`), control de transbordos | Pertenencia rápida y evitar revisitar o transitar estaciones cerradas | `has`/`add`: **O(1)** promedio |
+| **Map** | Lista de adyacencia (`Map<código, vecinos>`), `padre` en BFS, `indice.buscar` usa recorrido del ABB; pares clave-valor de nombres/componentes | Asociar código→vecinos/línea y código→padre para reconstruir rutas y mapear resultados | `get`/`set`/`has`: **O(1)** promedio |
+
+(V = estaciones, E = conexiones, n = nodos, h = altura del árbol).

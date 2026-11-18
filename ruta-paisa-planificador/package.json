@@ -1,10 +1,11 @@
 {
   "name": "ruta-paisa-planificador",
-  "version": "0.1.0",
-  "description": "Planificador Ruta Paisa v0.1: red, índice ABB de estaciones y consultas (Semana 4)",
+  "version": "0.2.0",
+  "description": "Planificador Ruta Paisa v0.2: grafo, DFS/BFS, cierres y planificador de viajes (Semana 4)",
   "main": "src/indice.js",
   "scripts": {
-    "start": "node src/indice.js",
+    "start": "node src/planificador.js",
+    "planificador": "node src/planificador.js",
     "indice": "node src/indice.js",
     "grafo": "node src/red.js",
     "cierres": "node src/cierres.js",
