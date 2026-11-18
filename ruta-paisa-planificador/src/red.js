@@ -1,170 +1,67 @@
 /**
- * Construcción y funciones recursivas del árbol general de la red Ruta Paisa.
+ * Construcción del grafo no dirigido de la red Ruta Paisa (Semana 4, Día 2).
+ * Cada par de estaciones consecutivas de una línea es una conexión.
  * Ejecutar: node src/red.js
  */
 
-const NodoArbol = require("./NodoArbol");
+const Grafo = require("./Grafo");
+const { construirIndiceOriginal } = require("./indice");
 
 /**
- * Imprime el árbol con sangría según el nivel.
- * @param {NodoArbol} nodo - Nodo raíz del subárbol a imprimir.
- * @param {number} [nivel=0] - Nivel de profundidad (0 = raíz).
- * @returns {void}
+ * Definición de líneas: estaciones en orden (códigos).
+ * @type {{nombre: string, estaciones: number[]}[]}
  */
-function imprimirArbol(nodo, nivel) {
-  const n = nivel === undefined ? 0 : nivel;
-  const sangria = "  ".repeat(n);
-  const prefijo = n === 0 ? "" : "- ";
-  console.log(`${sangria}${prefijo}${nodo.valor}`);
-  for (let i = 0; i < nodo.hijos.length; i++) {
-    imprimirArbol(nodo.hijos[i], n + 1);
-  }
-}
+const lineas = [
+  { nombre: "A", estaciones: [10, 20, 30, 35, 40, 45, 50, 60, 65, 70, 80, 90] },
+  { nombre: "B", estaciones: [50, 52, 54, 56, 58, 59] },
+  { nombre: "K", estaciones: [30, 25, 27, 29] },
+  { nombre: "T", estaciones: [40, 56, 65] },
+];
 
 /**
- * Cuenta el total de nodos del árbol (recursivo).
- * @param {NodoArbol} nodo - Nodo raíz del subárbol.
- * @returns {number} Total de nodos.
+ * Construye el grafo de la red a partir de las líneas.
+ * @returns {Grafo}
  */
-function contarNodos(nodo) {
-  let total = 1;
-  for (let i = 0; i < nodo.hijos.length; i++) {
-    total += contarNodos(nodo.hijos[i]);
-  }
-  return total;
-}
+function construirGrafoRed() {
+  const grafo = new Grafo();
 
-/**
- * Cuenta las hojas del árbol (nodos sin hijos), recursivo.
- * @param {NodoArbol} nodo - Nodo raíz del subárbol.
- * @returns {number} Número de hojas.
- */
-function contarHojas(nodo) {
-  if (nodo.hijos.length === 0) {
-    return 1;
-  }
-  let hojas = 0;
-  for (let i = 0; i < nodo.hijos.length; i++) {
-    hojas += contarHojas(nodo.hijos[i]);
-  }
-  return hojas;
-}
-
-/**
- * Calcula la altura del árbol en número de aristas (recursivo).
- * Una hoja tiene altura 0.
- * @param {NodoArbol} nodo - Nodo raíz del subárbol.
- * @returns {number} Altura.
- */
-function altura(nodo) {
-  if (nodo.hijos.length === 0) {
-    return 0;
-  }
-  let maxAlturaHijo = 0;
-  for (let i = 0; i < nodo.hijos.length; i++) {
-    const h = altura(nodo.hijos[i]);
-    if (h > maxAlturaHijo) {
-      maxAlturaHijo = h;
+  for (const linea of lineas) {
+    for (let i = 0; i < linea.estaciones.length; i++) {
+      grafo.agregarEstacion(linea.estaciones[i]);
+    }
+    for (let i = 0; i < linea.estaciones.length - 1; i++) {
+      grafo.conectar(linea.estaciones[i], linea.estaciones[i + 1]);
     }
   }
-  return 1 + maxAlturaHijo;
-}
 
-/**
- * Crea un nodo de estación con su nombre e id.
- * @param {string} nombre
- * @param {number} id
- * @returns {NodoArbol}
- */
-function estacion(nombre, id) {
-  return new NodoArbol(`${nombre} (${id})`);
-}
-
-/**
- * Construye el árbol general de la red piloto Ruta Paisa.
- * @returns {NodoArbol} Raíz del árbol.
- */
-function construirRed() {
-  const raiz = new NodoArbol("Red Ruta Paisa");
-
-  // Línea A
-  const lineaA = new NodoArbol("Línea A");
-  raiz.agregarHijo(lineaA);
-  const estacionesA = [
-    estacion("Niquía", 10),
-    estacion("Bello", 20),
-    estacion("Caribe", 30),
-    estacion("Universidad", 35),
-    estacion("Hospital", 40),
-    estacion("Parque Berrío", 45),
-    estacion("San Antonio", 50),
-    estacion("Exposiciones", 60),
-    estacion("Industriales", 65),
-    estacion("Poblado", 70),
-    estacion("Itagüí", 80),
-    estacion("La Estrella", 90),
-  ];
-  for (let i = 0; i < estacionesA.length; i++) {
-    lineaA.agregarHijo(estacionesA[i]);
-  }
-
-  // Línea B
-  const lineaB = new NodoArbol("Línea B");
-  raiz.agregarHijo(lineaB);
-  const estacionesB = [
-    estacion("San Antonio", 50),
-    estacion("Cisneros", 52),
-    estacion("Suramericana", 54),
-    estacion("Estadio", 56),
-    estacion("Floresta", 58),
-    estacion("San Javier", 59),
-  ];
-  for (let i = 0; i < estacionesB.length; i++) {
-    lineaB.agregarHijo(estacionesB[i]);
-  }
-
-  // Línea K
-  const lineaK = new NodoArbol("Línea K");
-  raiz.agregarHijo(lineaK);
-  const estacionesK = [
-    estacion("Caribe", 30),
-    estacion("Acevedo", 25),
-    estacion("Andalucía", 27),
-    estacion("Santo Domingo", 29),
-  ];
-  for (let i = 0; i < estacionesK.length; i++) {
-    lineaK.agregarHijo(estacionesK[i]);
-  }
-
-  // Servicios (hijos de estaciones específicas)
-  // San Antonio (aparición en Línea A): Bicicletas públicas y Ascensor
-  const sanAntonioLineaA = estacionesA[6];
-  sanAntonioLineaA.agregarHijo(new NodoArbol("Bicicletas públicas"));
-  sanAntonioLineaA.agregarHijo(new NodoArbol("Ascensor"));
-
-  // Poblado (Línea A): Parqueadero
-  const pobladoLineaA = estacionesA[9];
-  pobladoLineaA.agregarHijo(new NodoArbol("Parqueadero"));
-
-  return raiz;
+  return grafo;
 }
 
 if (require.main === module) {
-  const red = construirRed();
-  console.log("=== Árbol de la red Ruta Paisa ===");
-  imprimirArbol(red);
+  const grafo = construirGrafoRed();
 
-  console.log("\n=== Métricas recursivas ===");
-  console.log(`Total de nodos (contarNodos): ${contarNodos(red)}`);
-  console.log(`Total de hojas (contarHojas): ${contarHojas(red)}`);
-  console.log(`Altura del árbol (altura, en aristas): ${altura(red)}`);
+  // Reutilización del índice del Día 1 para traducir códigos a nombres
+  const indice = construirIndiceOriginal();
+
+  console.log("=== Grafo de la red Ruta Paisa (no dirigido) ===\n");
+  console.log(`Número de estaciones (V): ${grafo.numeroEstaciones()}`);
+  console.log(`Número de conexiones (E): ${grafo.numeroConexiones()}\n`);
+
+  console.log("-- Estaciones de transbordo (grado > 2) --");
+  for (const [codigo, vecinos] of grafo.adyacencia.entries()) {
+    if (vecinos.length > 2) {
+      const res = indice.buscar(codigo);
+      const nombre = res ? res.estacion : String(codigo);
+      console.log(`${nombre} (código ${codigo}) - grado ${vecinos.length}, vecinos: [${vecinos.join(", ")}]`);
+    }
+  }
+
+  console.log("\n-- Lista de adyacencia (código -> vecinos) --");
+  for (const [codigo, vecinos] of grafo.adyacencia.entries()) {
+    const res = indice.buscar(codigo);
+    const nombre = res ? res.estacion : String(codigo);
+    console.log(`${codigo} (${nombre}): [${vecinos.join(", ")}]`);
+  }
 }
 
-module.exports = {
-  NodoArbol,
-  imprimirArbol,
-  contarNodos,
-  contarHojas,
-  altura,
-  construirRed,
-};
+module.exports = { Grafo, construirGrafoRed, lineas };

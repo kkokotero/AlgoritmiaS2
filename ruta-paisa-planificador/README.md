@@ -16,8 +16,13 @@ node src/indice.js
 # o
 npm start
 
-# Árbol general de la red y métricas recursivas
+# Grafo no dirigido de la red (lista de adyacencia, V/E y transbordos)
 node src/red.js
+# o
+npm run grafo
+
+# Árbol general de la red y métricas recursivas
+node src/redArbol.js
 
 # ABB: inserción de las 20 estaciones y búsquedas por código con comparaciones
 node src/ArbolBusqueda.js
@@ -52,7 +57,9 @@ Implementadas en `src/ArbolBusqueda.js` y expuestas en el reporte `src/indice.js
 ruta-paisa-planificador/
 ├── src/
 │   ├── NodoArbol.js       # Árbol general (valor, hijos, agregarHijo)
-│   ├── red.js             # Construcción de la red y funciones recursivas
+│   ├── redArbol.js        # Construcción de la red como árbol general y funciones recursivas
+│   ├── Grafo.js           # Grafo no dirigido con lista de adyacencia (Map)
+│   ├── red.js             # Construcción del grafo de la red (líneas A,B,K,T)
 │   ├── ArbolBusqueda.js   # ABB: NodoBinario, insertar, buscar, recorridos, min/max, rango, métricas
 │   ├── recorridos.js      # Verificación de recorridos y reconstrucción
 │   └── indice.js          # Índice v0.1 y reporte de consultas

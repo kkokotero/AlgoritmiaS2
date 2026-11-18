@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/indice.js",
     "indice": "node src/indice.js",
-    "red": "node src/red.js",
+    "grafo": "node src/red.js",
+    "arbol": "node src/redArbol.js",
     "abb": "node src/ArbolBusqueda.js",
     "recorridos": "node src/recorridos.js"
   },
