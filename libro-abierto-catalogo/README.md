@@ -13,7 +13,9 @@ libro-abierto-catalogo/
 │   ├── muestra.js     # Muestra de referencia (8 libros)
 │   ├── generador.js   # Generador de catálogos (ISBN únicos)
 │   └── explorar.js    # Exploración y verificación del catálogo generado
-├── bitacora.md
+├── bitacora.md        # Índice/enlace a bitácoras en docs/
+├── jsconfig.json
+├── package.json
 └── README.md
 ```
 
@@ -23,6 +25,8 @@ Desde la carpeta `libro-abierto-catalogo/`:
 ```bash
 # Exploración: genera 10.000 libros, verifica unicidad y muestra estadísticas
 node src/explorar.js
+# o
+npm run explorar
 ```
 
 **Salida esperada:** total 10.000 libros con ISBN únicos, primeros 5 libros, año más antiguo, año más reciente y total de préstamos.
@@ -30,8 +34,11 @@ node src/explorar.js
 ## Modelo de datos
 Cada libro es un objeto: `{ isbn, titulo, autor, anio, prestamos }` donde `isbn` es un string de 13 dígitos.
 
+## Bitácoras
+Las bitácoras están en [`docs/semana-3/`](../docs/semana-3/) (organizadas por semana y día):
+- [Día 1: Modelo de datos y generador de catálogos](../docs/semana-3/bitacora-dia-1.md)
+
 ## Semana 3 — Día 1
 - Muestra de 8 libros (`src/muestra.js`).
 - Generador `generarCatalogo(n)` con ISBN únicos, títulos/autores combinados, año 1900–2026 y préstamos 0–500 (`src/generador.js`).
 - Exploración y verificación de unicidad con n = 10.000 (`src/explorar.js`).
-- Bitácora con justificación del ISBN como texto y consultas de la red: `bitacora.md` y `../docs/semana-3/bitacora-dia-1.md`.
