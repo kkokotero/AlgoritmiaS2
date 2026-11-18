@@ -23,8 +23,9 @@ const { ordenarPorIsbn, buscarPorIsbn, primeraPosicionIsbn } = require("./busque
  * @param {{copiasRepetidas?: number}} [opciones] - Opciones del generador.
  * @returns {{catalogo: Libro[], catalogoOrdenadoIsbn: Libro[]}}
  */
-function crearCatalogo(n = 10000, opciones = {}) {
-  const catalogo = generarCatalogo(n, opciones);
+function crearCatalogo(n, opciones) {
+  const total = n === undefined ? 10000 : n;
+  const catalogo = generarCatalogo(total, opciones);
   const catalogoOrdenadoIsbn = ordenarPorIsbn(catalogo);
   return { catalogo, catalogoOrdenadoIsbn };
 }
@@ -90,7 +91,7 @@ function ejecutarReporte() {
   const libroTitulo = catalogo[Math.floor(catalogo.length / 2)];
   const libroAutor = catalogo[100];
   const libroIsbn = catalogo[500];
-  const palabra = libroTitulo.titulo.split(" ")[0];
+  const palabra = libroTitulo.titulo.split(" ")[0] || "de";
 
   console.log("=== Catálogo Libro Abierto v0.1 ===");
   console.log(`Libros generados: ${catalogo.length}`);

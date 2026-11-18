@@ -16,7 +16,7 @@ const {
  * Búsqueda lineal por ISBN (conteo de comparaciones).
  * @param {{isbn:string,titulo:string,autor:string,anio:number,prestamos:number}[]} libros
  * @param {string} isbn
- * @returns {{libro: any, comparaciones: number}}
+ * @returns {{libro: {isbn:string,titulo:string,autor:string,anio:number,prestamos:number} | null, comparaciones: number}}
  */
 function buscarPorIsbnLineal(libros, isbn) {
   let comparaciones = 0;
@@ -36,7 +36,12 @@ for (let i = 0; i < catalogoPrueba.length; i++) {
   const isbn = catalogoPrueba[i].isbn;
   const it = buscarPorIsbn(catalogoPrueba, isbn);
   const rec = buscarPorIsbnRecursivo(catalogoPrueba, isbn, 0, catalogoPrueba.length - 1);
-  if (it.comparaciones !== rec.comparaciones || it.libro.isbn !== rec.libro.isbn) {
+  if (it.libro && rec.libro) {
+    if (it.comparaciones !== rec.comparaciones || it.libro.isbn !== rec.libro.isbn) {
+      iguales = false;
+      break;
+    }
+  } else if (it.libro !== rec.libro) {
     iguales = false;
     break;
   }

@@ -4,7 +4,7 @@
  */
 
 const { generarCatalogo } = require("./generador");
-const { buscarPorTitulo } = require("./busqueda");
+const { buscarPorTitulo, buscarPorAutor, buscarPorPalabra } = require("./busqueda");
 const muestra = require("./muestra");
 
 /**
@@ -58,7 +58,7 @@ for (let i = 0; i < muestra.length; i++) {
 console.log(`Comparaciones totales: ${traza.comparaciones}`);
 
 // Demostración autor y palabra
-const porAutor = require("./busqueda").buscarPorAutor(muestra, "Laura Restrepo");
+const porAutor = buscarPorAutor(muestra, "Laura Restrepo");
 console.log(`\nEjemplo buscarPorAutor("Laura Restrepo"): ${porAutor.libros.length} resultado(s), ${porAutor.comparaciones} comparaciones.`);
-const porPalabra = require("./busqueda").buscarPorPalabra(muestra, "de");
+const porPalabra = buscarPorPalabra(muestra, "de");
 console.log(`Ejemplo buscarPorPalabra("de"): ${porPalabra.libros.length} resultado(s), ${porPalabra.comparaciones} comparaciones.`);

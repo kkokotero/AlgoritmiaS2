@@ -70,8 +70,9 @@ function generarAutor() {
  * @param {{copiasRepetidas?: number}} [opciones] - Opciones del generador.
  * @returns {{isbn: string, titulo: string, autor: string, anio: number, prestamos: number}[]} Catálogo generado.
  */
-function generarCatalogo(n, opciones = {}) {
-  const { copiasRepetidas = 0 } = opciones;
+function generarCatalogo(n, opciones) {
+  const config = opciones || {};
+  const copiasRepetidas = config.copiasRepetidas || 0;
   const cantidadBase = Math.max(0, n - copiasRepetidas);
   /** @type {{isbn: string, titulo: string, autor: string, anio: number, prestamos: number}[]} */
   const catalogo = [];

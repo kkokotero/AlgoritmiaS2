@@ -23,6 +23,11 @@ catalogo.slice(0, 5).forEach((libro, i) => {
   );
 });
 
+if (catalogo.length === 0) {
+  console.log("\nCatálogo vacío.");
+  process.exit(0);
+}
+
 let anioMasAntiguo = catalogo[0].anio;
 let anioMasReciente = catalogo[0].anio;
 let totalPrestamos = 0;
