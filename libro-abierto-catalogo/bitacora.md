@@ -15,5 +15,5 @@ Las bitácoras detalladas se registran en `docs/` organizada por semana y día:
 ## Día 2
 - **Ordenamiento:** `bubbleSort`, `selectionSort`, `insertionSort` en `src/ordenamiento.js` con contadores (comparaciones, intercambios, desplazamientos, pasadas) y trazas.
 - **Generador:** `casiOrdenado(n, cambios)` (catálogo ordenado por año con pocos libros fuera de lugar al final).
-- **Trazas:** arreglo `[2006, 1967, 2004, 1924, 1999]` tras cada pasada para los tres algoritmos.
-- **Mediciones:** 2.000 libros en estados aleatorio, ordenado, invertido y casi ordenado. Insertion Sort aprovecha mejor los datos casi ordenados; Selection Sort hace menos intercambios y comparaciones constantes; los tres son O(n²) en el peor caso.
+- **Trazas y mediciones:** `[2006,1967,2004,1924,1999]` y 2.000 libros en 4 estados. Insertion Sort aprovecha mejor datos casi ordenados; Selection Sort hace menos intercambios y comparaciones constantes; los tres O(n²) en peor caso.
+- **Criterios múltiples y estabilidad:** `src/comparadores.js` (`porAutorYTitulo` con `localeCompare` `sensitivity:"base"`, `porPrestamosDesc`, `invertir(comparar)`), experimento del bibliotecario y trazas en `src/medirEstabilidad.js`; Bubble/Insertion estables, Selection inestable (rompe orden de títulos dentro del autor); definición de estabilidad con ejemplo de la red.

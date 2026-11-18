@@ -93,3 +93,98 @@ Aunque son **O(n²)** en el peor caso, las mediciones difieren porque: (1) las c
 - `libro-abierto-catalogo/src/ordenamiento.js` (Bubble, Selection, Insertion con contadores y traza)
 - `libro-abierto-catalogo/src/generador.js` (`generarCatalogo`, `casiOrdenado(n, cambios)`)
 - `libro-abierto-catalogo/src/medirOrdenamiento.js` (trazas y tabla comparativa)
+
+---
+
+## Día 2 (continuación): Criterios múltiples y estabilidad
+
+### Contexto
+Inventario anual: ordenar por **autor** y, dentro de cada autor, por **título**. Se investiga por qué el método del bibliotecario (primero por título, luego por autor) funciona con unos algoritmos y con otros revuelve los títulos.
+
+**Tabla de prueba:**
+
+| Autor | Título | Año |
+|---|---|---:|
+| Laura Restrepo | Delirio | 2004 |
+| Mario Mendoza | Cobro de sangre | 2004 |
+| Laura Restrepo | Dulce compañía | 1995 |
+| Mario Mendoza | Buda Blues | 2009 |
+| Laura Restrepo | La novia oscura | 1999 |
+
+### Implementación (`libro-abierto-catalogo/src/comparadores.js`)
+- `porAutorYTitulo(a,b)`: comparador compuesto; compara primero por autor y, si son iguales, por título. Ignora mayúsculas y tildes con `localeCompare(..., "es", { sensitivity: "base" })`.
+- `porAutor(a,b)`, `porTitulo(a,b)`, `porAnio(a,b)`.
+- `porPrestamosDesc(a,b)`: ordena de más a menos prestados (`b.prestamos - a.prestamos`).
+- `invertir(comparar)`: función que recibe un comparador y devuelve el comparador contrario (`(a,b) => -comparar(a,b)`), sin escribir un comparador nuevo (ej. `invertir(porAnio)` → más reciente a más antiguo).
+
+Script de experimento: `src/medirEstabilidad.js` (`npm run estabilidad`).
+
+### 1. Orden con comparador compuesto `porAutorYTitulo`
+Los tres algoritmos (Bubble, Selection, Insertion) producen el mismo resultado:
+
+| # | Autor | Título |
+|---:|---|---|
+| 1 | Laura Restrepo | Delirio |
+| 2 | Laura Restrepo | Dulce compañía |
+| 3 | Laura Restrepo | La novia oscura |
+| 4 | Mario Mendoza | Buda Blues |
+| 5 | Mario Mendoza | Cobro de sangre |
+
+Laura Restrepo aparece primero y sus tres títulos quedan en orden alfabético; igual para Mario Mendoza.
+
+### 2. Método del bibliotecario: primero por título, luego solo por autor
+**Paso 1 (por título, igual en los tres algoritmos):**
+
+| # | Autor | Título |
+|---:|---|---|
+| 1 | Mario Mendoza | Buda Blues |
+| 2 | Mario Mendoza | Cobro de sangre |
+| 3 | Laura Restrepo | Delirio |
+| 4 | Laura Restrepo | Dulce compañía |
+| 5 | Laura Restrepo | La novia oscura |
+
+(Dentro de cada autor ya quedó orden por título: Mendoza [Buda Blues, Cobro de sangre]; Restrepo [Delirio, Dulce compañía, La novia oscura]).
+
+**Paso 2 (ordenar solo por autor sobre el resultado del paso 1) — trazas y resultado:**
+
+#### Bubble Sort (paso 2)
+| Pasada | Arreglo tras la pasada (Autor:Título) |
+|---:|---|
+| 1 | Mario:Buda Blues \| Laura:Delirio \| Laura:Dulce compañía \| Laura:La novia oscura \| Mario:Cobro de sangre |
+| 2 | Laura:Delirio \| Laura:Dulce compañía \| Laura:La novia oscura \| Mario:Buda Blues \| Mario:Cobro de sangre |
+| 3 | Laura:Delirio \| Laura:Dulce compañía \| Laura:La novia oscura \| Mario:Buda Blues \| Mario:Cobro de sangre |
+
+**Resultado final:** Laura (Delirio, Dulce compañía, La novia oscura), Mario (Buda Blues, Cobro de sangre). **Conserva el orden por título dentro de cada autor → estable.**
+
+#### Selection Sort (paso 2) — **inestable**
+| Pasada | Arreglo tras la pasada (Autor:Título) |
+|---:|---|
+| 1 | Laura:Delirio \| Mario:Cobro de sangre \| Mario:Buda Blues \| Laura:Dulce compañía \| Laura:La novia oscura |
+| 2 | Laura:Delirio \| Laura:Dulce compañía \| Mario:Buda Blues \| Mario:Cobro de sangre \| Laura:La novia oscura |
+| 3 | Laura:Delirio \| Laura:Dulce compañía \| Laura:La novia oscura \| Mario:Cobro de sangre \| Mario:Buda Blues |
+| 4 | Laura:Delirio \| Laura:Dulce compañía \| Laura:La novia oscura \| Mario:Cobro de sangre \| Mario:Buda Blues |
+
+**Resultado final:** Laura (Delirio, Dulce compañía, La novia oscura), Mario (**Cobro de sangre, Buda Blues**). **No conserva el orden por título dentro de Mario Mendoza → inestable.**
+
+**Explicación con la traza (por qué ocurre la inestabilidad):** al inicio del paso 2, los dos libros de Mario Mendoza estaban en orden de título: `[Mario:Buda Blues, Mario:Cobro de sangre, ...]`. En la **pasada 1**, Selection Sort busca el mínimo por autor desde el índice 0 y encuentra `Laura:Delirio` (índice 2); intercambia la posición 0 con la 2 de forma **no adyacente**, produciendo `[Laura:Delirio, Mario:Cobro de sangre, Mario:Buda Blues, ...]`. Ese intercambio de larga distancia “saltó” a `Buda Blues` por encima de `Cobro de sangre`, invirtiendo el orden relativo de dos elementos con **clave igual** (mismo autor). Como Selection Sort mueve elementos lejanos sin preservar el orden relativo de los iguales, el resultado final deja a Mendoza como [Cobro de sangre, Buda Blues] en lugar de [Buda Blues, Cobro de sangre].
+
+#### Insertion Sort (paso 2)
+| Pasada | Arreglo tras la pasada (Autor:Título) |
+|---:|---|
+| 1 | Mario:Buda Blues \| Mario:Cobro de sangre \| Laura:Delirio \| Laura:Dulce compañía \| Laura:La novia oscura |
+| 2 | Laura:Delirio \| Mario:Buda Blues \| Mario:Cobro de sangre \| Laura:Dulce compañía \| Laura:La novia oscura |
+| 3 | Laura:Delirio \| Laura:Dulce compañía \| Mario:Buda Blues \| Mario:Cobro de sangre \| Laura:La novia oscura |
+| 4 | Laura:Delirio \| Laura:Dulce compañía \| Laura:La novia oscura \| Mario:Buda Blues \| Mario:Cobro de sangre |
+
+**Resultado final:** Laura (Delirio, Dulce compañía, La novia oscura), Mario (Buda Blues, Cobro de sangre). **Conserva el orden por título dentro de cada autor → estable.** (Insertion desplaza solo cuando el elemento anterior es **mayor** que el actual, no cuando es igual).
+
+**Conclusión del experimento:** Bubble Sort e Insertion Sort son **estables** y conservan el orden por título dentro de cada autor al reordenar solo por autor; **Selection Sort es inestable** y puede invertir el orden relativo de elementos con igual clave.
+
+### 3. Comparadores adicionales
+- `porPrestamosDesc(a,b)`: ordena de más a menos prestados. Resultado en la tabla: Delirio (201), Dulce compañía (180), La novia oscura (150), Cobro de sangre (120), Buda Blues (95).
+- `invertir(comparar)`: recibe un comparador y devuelve el contrario. `invertir(porAnio)` aplicado a la tabla produce orden de **más reciente a más antiguo** sin escribir un comparador nuevo: Buda Blues (2009), Delirio (2004), Cobro de sangre (2004), La novia oscura (1999), Dulce compañía (1995).
+
+### 4. Definición de estabilidad (con ejemplo de la red de bibliotecas)
+**Estabilidad:** un algoritmo de ordenamiento es **estable** si, cuando dos elementos tienen la misma clave de ordenación, conserva el **orden relativo** que tenían en la entrada. Si el algoritmo puede intercambiar o mover elementos iguales y alterar ese orden relativo, es **inestable**.
+
+**Ejemplo (red de bibliotecas Libro Abierto):** el catálogo llega con los libros de cada sede ya ordenados por **título**. Para el inventario anual se necesita ordenarlo por **autor** y, dentro de cada autor, por **título**. Si se intenta en dos pasos (primero por título, luego solo por autor) usando un algoritmo **estable** (Bubble/Insertion), los libros de un mismo autor mantienen el orden alfabético por título conseguido en el primer paso. Si se usa **Selection Sort** (inestable), dos libros del mismo autor pueden quedar con sus títulos invertidos respecto al orden previo (como ocurrió con *Buda Blues* y *Cobro de sangre* de Mario Mendoza), exigiendo un comparador compuesto `porAutorYTitulo` en una sola pasada o un algoritmo estable para no perder el criterio secundario.

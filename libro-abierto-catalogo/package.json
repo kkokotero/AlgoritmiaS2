@@ -8,6 +8,7 @@
     "busqueda": "node src/medirBusqueda.js",
     "binaria": "node src/comparacionBinaria.js",
     "ordenamiento": "node src/medirOrdenamiento.js",
+    "estabilidad": "node src/medirEstabilidad.js",
     "catalogo": "node src/catalogo.js",
     "start": "node src/catalogo.js"
   },
