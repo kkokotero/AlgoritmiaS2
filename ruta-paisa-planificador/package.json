@@ -1,0 +1,17 @@
+{
+  "name": "ruta-paisa-planificador",
+  "version": "0.1.0",
+  "description": "Planificador de la red Ruta Paisa - modelado como árbol general (Semana 4)",
+  "main": "src/red.js",
+  "scripts": {
+    "start": "node src/red.js",
+    "red": "node src/red.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  }
+}
