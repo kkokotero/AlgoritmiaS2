@@ -1,6 +1,6 @@
 {
   "name": "libro-abierto-catalogo",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Motor de búsqueda y ordenamiento del catálogo Libro Abierto (Semana 3)",
   "main": "src/explorar.js",
   "scripts": {
@@ -9,6 +9,7 @@
     "binaria": "node src/comparacionBinaria.js",
     "ordenamiento": "node src/medirOrdenamiento.js",
     "estabilidad": "node src/medirEstabilidad.js",
+    "laboratorio": "node src/laboratorio.js",
     "catalogo": "node src/catalogo.js",
     "start": "node src/catalogo.js"
   },

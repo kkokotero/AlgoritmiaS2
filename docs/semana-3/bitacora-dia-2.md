@@ -188,3 +188,35 @@ Laura Restrepo aparece primero y sus tres títulos quedan en orden alfabético; 
 **Estabilidad:** un algoritmo de ordenamiento es **estable** si, cuando dos elementos tienen la misma clave de ordenación, conserva el **orden relativo** que tenían en la entrada. Si el algoritmo puede intercambiar o mover elementos iguales y alterar ese orden relativo, es **inestable**.
 
 **Ejemplo (red de bibliotecas Libro Abierto):** el catálogo llega con los libros de cada sede ya ordenados por **título**. Para el inventario anual se necesita ordenarlo por **autor** y, dentro de cada autor, por **título**. Si se intenta en dos pasos (primero por título, luego solo por autor) usando un algoritmo **estable** (Bubble/Insertion), los libros de un mismo autor mantienen el orden alfabético por título conseguido en el primer paso. Si se usa **Selection Sort** (inestable), dos libros del mismo autor pueden quedar con sus títulos invertidos respecto al orden previo (como ocurrió con *Buda Blues* y *Cobro de sangre* de Mario Mendoza), exigiendo un comparador compuesto `porAutorYTitulo` en una sola pasada o un algoritmo estable para no perder el criterio secundario.
+
+---
+
+## Día 2 (cierre): Laboratorio de rendimiento y recomendaciones (v0.2)
+
+### Laboratorio (`src/laboratorio.js`, `npm run laboratorio`)
+Ejecuta **Bubble Sort, Selection Sort, Insertion Sort** y **`sort` nativo** (referencia de tiempo) con **500, 1.000, 2.000 y 4.000** libros en cuatro estados: **aleatorio, ordenado, invertido y casi ordenado**. Para cada caso muestra con `console.table`: comparaciones, intercambios, tiempo (ms) y verificación; incluye columna de tiempo de `sort` nativo. **Verificación automática:** todos los resultados en `OK`, sin `FALLA`.
+
+### Análisis: crecimiento del tiempo al duplicar n (relación con O(n²))
+Para algoritmos **O(n²)**, si el tamaño se duplica (`n → 2n`), el trabajo crece como `(2n)²/n² = 4`, por lo que el tiempo debería crecer aproximadamente **×4**. En la tabla de crecimiento del laboratorio (razón `t2/t1`):
+
+- **Aleatorio:** 1000→2000 y 2000→4000 dan razones ~**3.3–5.2** (Bubble 3.32/3.90, Selection 2.80/3.83, Insertion 5.23/3.20), coherente con ~×4 (la primera transición 500→1000 es ruidosa por tiempos muy pequeños/JIT).
+- **Invertido (peor caso):** razones cercanas a 4 en los saltos grandes: Bubble 3.63/4.96, Selection 4.54/4.27, Insertion 4.15/4.86 (y ~3.35–4.15 en 500→1000).
+- **Casi ordenado:** Bubble y Selection siguen ~**3.6–4.3** (2000→4000: 4.22 y 4.24) porque igual realizan ~O(n²) comparaciones; **Insertion** crece mucho menos (~1.7–2.8) al hacer trabajo cercano a O(n) con pocos elementos fuera de lugar (mejor comportamiento adaptativo).
+- **Ordenado (caso favorable):** Bubble/Insertion hacen ~n comparaciones (razones ~1–3.7, tiempos ínfimos), mientras **Selection** mantiene ~n² comparaciones y su tiempo crece ~**3.3–4.5** al duplicar n.
+- **`sort` nativo:** razones ~**1.6–2.4**, acordes a un algoritmo eficiente (O(n log n) en promedio) y muy por debajo de los cuadráticos.
+
+Los datos confirman que, en los escenarios donde realizan trabajo cuadrático, al duplicar `n` el tiempo de los algoritmos básicos tiende a **cuadruplicarse**, consistente con **O(n²)** (con variaciones por constantes, estado de los datos y ruido de medición en tamaños pequeños).
+
+### Recomendaciones por proceso (justificadas con mediciones)
+
+| Proceso | Recomendación | Justificación con datos |
+|---|---|---|
+| **Reordenamiento nocturno del catálogo completo (~10.000 libros)** | Usar **`sort` nativo** (o un algoritmo eficiente tipo O(n log n)), no los cuadráticos. | En el laboratorio (4000, aleatorio) `sort` tarda **0.611 ms** vs **19.56 ms** Bubble, **12.06 ms** Selection y **6.84 ms** Insertion; en invertido `sort` **0.349 ms** vs 16–24 ms. Al escalar a 10.000, los O(n²) crecerían ~×6.25 respecto a 4000 (≈40–150+ ms) mientras `sort` crece ~n log n; además `sort` es estable/optimizado en motores modernos y evita la degradación cuadrática. |
+| **Inserción diaria de libros que llegan (catálogo casi ordenado + pocos nuevos al final)** | **Insertion Sort** (o inserción incremental) si se mantiene el catálogo casi ordenado; para volúmenes mayores, `sort` nativo sigue siendo seguro. | Con datos **casi ordenados**, Insertion es el más rápido: n=4000 → **0.193 ms** (71.072 comp./70.990 despl.) vs Bubble **17.06 ms** (7.99M comp.) y Selection **13.73 ms** (7.99M comp., no se adapta). En n=2000 casi ordenado: **0.112 ms** vs 4.05/3.24 ms. Su carácter **estable** preserva el orden previo ante claves iguales. |
+| **Listas pequeñas de exhibición (~20 libros)** | **Insertion Sort** (o Bubble/Selection) es suficiente; la simplicidad prima y la diferencia es irrelevante. | Para n pequeños el trabajo O(n²) es mínimo (máx. ~190 comparaciones para n=20, n·(n-1)/2). En el laboratorio, a n=500 ya se observan tiempos sub-milisegundo en casos favorables y pocos ms en el peor; a n=20 cualquier cuadrático es instantáneo (<0.01 ms). Insertion es preferible si la lista suele estar casi ordenada y, si importa el criterio secundario, es **estable** (a diferencia de Selection). |
+
+### Archivos v0.2
+- `src/ordenamiento.js` (Bubble, Selection, Insertion + export de comparadores)
+- `src/comparadores.js`, `src/generador.js` (`casiOrdenado`)
+- `src/medirOrdenamiento.js`, `src/medirEstabilidad.js`
+- `src/laboratorio.js` (tabla de rendimiento y verificación)

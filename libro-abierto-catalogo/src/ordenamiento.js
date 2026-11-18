@@ -134,4 +134,6 @@ function insertionSort(arreglo, comparar, opciones) {
   return resultado;
 }
 
-module.exports = { bubbleSort, selectionSort, insertionSort };
+const comparadores = require("./comparadores");
+
+module.exports = { bubbleSort, selectionSort, insertionSort, ...comparadores };
