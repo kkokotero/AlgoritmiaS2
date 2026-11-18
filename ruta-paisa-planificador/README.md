@@ -1,52 +1,69 @@
-# Ruta Paisa — Planificador (Semana 4)
+# Planificador Ruta Paisa v0.1 (Semana 4)
 
-## Descripción
-Proyecto para modelar la red piloto **Ruta Paisa** como un **árbol general** (jerarquía: red → líneas → estaciones → servicios) y recorrerla con funciones recursivas. Incluye `NodoArbol` y utilidades para imprimir, contar nodos, contar hojas y calcular la altura.
+## Qué es el proyecto
+**Ruta Paisa Planificador** modela la red piloto de transporte (líneas, estaciones y servicios) y provee un **índice de estaciones consultable** basado en un **árbol binario de búsqueda (ABB)** por código numérico. Permite representar la jerarquía de la red como árbol general, indexar estaciones para búsquedas eficientes, generar listados ordenados/exportables y analizar el impacto del orden de inserción en el rendimiento del árbol.
 
 ## Requisitos
 - [Node.js](https://nodejs.org/) >= 18
 - Git
 
+## Cómo ejecutarlo
+Desde la carpeta `ruta-paisa-planificador/`:
+
+```bash
+# v0.1: índice consultable y reporte de consultas (búsquedas, mínimo, máximo, rango, listado)
+node src/indice.js
+# o
+npm start
+
+# Árbol general de la red y métricas recursivas
+node src/red.js
+
+# ABB: inserción de las 20 estaciones y búsquedas por código con comparaciones
+node src/ArbolBusqueda.js
+
+# Recorridos (inorden, preorden, postorden), exportación/reconstrucción y métricas
+node src/recorridos.js
+```
+
+**Salida esperada (`indice.js`):** reporte con búsquedas por código (y comparaciones), `minimo()`/`maximo()`, rango de zona norte (10–30), listado completo inorden, métricas del índice y análisis del árbol degenerado al insertar en orden ascendente (altura, comparaciones para San Javier y La Estrella).  
+**Salida esperada (`red.js`):** árbol general con sangría y métricas (`contarNodos`, `contarHojas`, `altura`).  
+**Salida esperada (`ArbolBusqueda.js`):** búsquedas con comparaciones (San Antonio 1, San Javier 7, Niquía 4, Hospital 3, código 33 → `null`).  
+**Salida esperada (`recorridos.js`):** secuencias inorden/preorden/postorden, verificación ascendente, reconstrucción idéntica desde preorden, conteo postorden y altura/hojas (altura 6, 8 hojas, mínima teórica `floor(log2(20))=4`).
+
+## Consultas soportadas por el índice
+Implementadas en `src/ArbolBusqueda.js` y expuestas en el reporte `src/indice.js`:
+
+| Consulta | Método | Descripción |
+|---|---|---|
+| Búsqueda por código | `buscar(codigo)` | Devuelve `{ estacion, comparaciones }` o `null` si no existe (O(h)). |
+| Mínimo | `minimo()` | Estación con menor código (extremo izquierdo), sin recorrer todo el árbol. |
+| Máximo | `maximo()` | Estación con mayor código (extremo derecho), sin recorrer todo el árbol. |
+| Rango | `rango(desde, hasta)` | Estaciones con código en `[desde, hasta]` **en orden**, con poda de ramas que no pueden contener resultados. |
+| Listado completo | `inorden(callback)` | Recorre en orden ascendente de código (útil para tableros informativos). |
+| Exportar índice | `preorden(callback)` | Secuencia para reconstruir un árbol con la misma forma en otro servidor. |
+| Liberación segura | `postorden(callback)` | Procesa hijos antes que el padre (apropiado para liberar/reiniciar el índice). |
+| Métricas | `altura()`, `contarHojas()`, `contarNodos()` | Altura en aristas, hojas y total de nodos. |
+
+**Datos de la red piloto (20 estaciones):** 50 San Antonio, 30 Caribe, 70 Poblado, 20 Bello, 40 Hospital, 60 Exposiciones, 80 Itagüí, 10 Niquía, 25 Acevedo, 35 Universidad, 45 Parque Berrío, 52 Cisneros, 56 Estadio, 65 Industriales, 90 La Estrella, 27 Andalucía, 29 Santo Domingo, 54 Suramericana, 58 Floresta, 59 San Javier.
+
 ## Estructura
 ```
 ruta-paisa-planificador/
 ├── src/
-│   ├── NodoArbol.js       # Clase NodoArbol (valor, hijos, agregarHijo)
-│   ├── red.js             # Árbol general de la red y funciones recursivas
-│   ├── ArbolBusqueda.js   # ABB por código: NodoBinario, insertar, buscar, recorridos, altura/hojas
-│   └── recorridos.js      # Verificación de recorridos, exportación/reconstrucción y métricas
-├── bitacora.md            # Bitácora (dibujos, métricas y análisis)
+│   ├── NodoArbol.js       # Árbol general (valor, hijos, agregarHijo)
+│   ├── red.js             # Construcción de la red y funciones recursivas
+│   ├── ArbolBusqueda.js   # ABB: NodoBinario, insertar, buscar, recorridos, min/max, rango, métricas
+│   ├── recorridos.js      # Verificación de recorridos y reconstrucción
+│   └── indice.js          # Índice v0.1 y reporte de consultas
+├── bitacora.md            # Índice de bitácoras
 ├── jsconfig.json
 ├── package.json
 └── README.md
 ```
 
-## Ejecución
-Desde la carpeta `ruta-paisa-planificador/`:
-
-```bash
-# Árbol general de la red y métricas recursivas
-node src/red.js
-# o
-npm start
-
-# Árbol binario de búsqueda por código de estación (inserción y búsqueda)
-node src/ArbolBusqueda.js
-
-# Recorridos (inorden, preorden, postorden), reconstrucción, altura y hojas
-node src/recorridos.js
-```
-
-**Salida esperada (`red.js`):** impresión del árbol con sangría y métricas recursivas.  
-**Salida esperada (`ArbolBusqueda.js`):** inserción de 20 estaciones y búsquedas con comparaciones (San Antonio 1, San Javier 7, Niquía 4, Hospital 3, código 33 `null`).  
-**Salida esperada (`recorridos.js`):** secuencias inorden/preorden/postorden, verificación de orden ascendente, reconstrucción idéntica desde preorden, conteo por postorden, altura (6), hojas (8) y comparación con altura mínima `floor(log2(20))`.
-
-## Red piloto modelada
-- **Línea A:** Niquía (10), Bello (20), Caribe (30), Universidad (35), Hospital (40), Parque Berrío (45), San Antonio (50), Exposiciones (60), Industriales (65), Poblado (70), Itagüí (80), La Estrella (90)
-- **Línea B:** San Antonio (50), Cisneros (52), Suramericana (54), Estadio (56), Floresta (58), San Javier (59)
-- **Línea K:** Caribe (30), Acevedo (25), Andalucía (27), Santo Domingo (29)
-
-**Servicios:** San Antonio → Bicicletas públicas, Ascensor; Poblado → Parqueadero.
-
 ## Bitácora
-- Detalle en [`bitacora.md`](bitacora.md) y en [`../docs/semana-4/bitacora-dia-1.md`](../docs/semana-4/bitacora-dia-1.md): dibujo del árbol, terminología (raíz, nodos internos, hojas, niveles, altura) y análisis de estaciones compartidas.
+Bitácoras detalladas (dibujos, predicciones, verificaciones y análisis del árbol degenerado) en [`../docs/semana-4/`](../docs/semana-4/):
+- [Día 1: árbol general, ABB, recorridos y consultas](../docs/semana-4/bitacora-dia-1.md)
+
+`bitacora.md` en este proyecto actúa como índice/enlace.

@@ -194,6 +194,61 @@ class ArbolBusqueda {
     };
     return contar(this.raiz);
   }
+
+  /**
+   * Devuelve la estación con el código mínimo (extremo izquierdo), sin recorrer todo el árbol.
+   * @returns {{codigo: number, estacion: string} | null}
+   */
+  minimo() {
+    if (this.raiz === null) return null;
+    let actual = this.raiz;
+    while (actual.izquierdo !== null) {
+      actual = actual.izquierdo;
+    }
+    return { codigo: actual.codigo, estacion: actual.estacion };
+  }
+
+  /**
+   * Devuelve la estación con el código máximo (extremo derecho), sin recorrer todo el árbol.
+   * @returns {{codigo: number, estacion: string} | null}
+   */
+  maximo() {
+    if (this.raiz === null) return null;
+    let actual = this.raiz;
+    while (actual.derecho !== null) {
+      actual = actual.derecho;
+    }
+    return { codigo: actual.codigo, estacion: actual.estacion };
+  }
+
+  /**
+   * Devuelve en orden las estaciones con código dentro del rango [desde, hasta],
+   * evitando visitar ramas que no pueden contener resultados (poda).
+   * @param {number} desde - Código mínimo del rango (inclusive).
+   * @param {number} hasta - Código máximo del rango (inclusive).
+   * @returns {{codigo: number, estacion: string}[]}
+   */
+  rango(desde, hasta) {
+    /** @type {{codigo: number, estacion: string}[]} */
+    const resultados = [];
+    /**
+     * @param {NodoBinario | null} nodo
+     */
+    const recorrer = (nodo) => {
+      if (nodo === null) return;
+      if (nodo.codigo > desde) {
+        recorrer(nodo.izquierdo);
+      }
+      if (nodo.codigo >= desde && nodo.codigo <= hasta) {
+        resultados.push({ codigo: nodo.codigo, estacion: nodo.estacion });
+      }
+      if (nodo.codigo < hasta) {
+        recorrer(nodo.derecho);
+      }
+    };
+    recorrer(this.raiz);
+    return resultados;
+  }
 }
 
 if (require.main === module) {

@@ -1,11 +1,14 @@
 {
   "name": "ruta-paisa-planificador",
   "version": "0.1.0",
-  "description": "Planificador de la red Ruta Paisa - modelado como árbol general (Semana 4)",
-  "main": "src/red.js",
+  "description": "Planificador Ruta Paisa v0.1: red, índice ABB de estaciones y consultas (Semana 4)",
+  "main": "src/indice.js",
   "scripts": {
-    "start": "node src/red.js",
-    "red": "node src/red.js"
+    "start": "node src/indice.js",
+    "indice": "node src/indice.js",
+    "red": "node src/red.js",
+    "abb": "node src/ArbolBusqueda.js",
+    "recorridos": "node src/recorridos.js"
   },
   "keywords": [],
   "author": "",

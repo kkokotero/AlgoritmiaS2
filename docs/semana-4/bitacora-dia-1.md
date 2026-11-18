@@ -164,3 +164,43 @@ En cada paso se realiza **1 comparación** de igualdad (y se decide ir a izquier
 - Nodos (n): **20**.
 - Altura mínima posible para 20 nodos (árbol binario lo más balanceado): `floor(log2(n)) = floor(log2(20)) = 4` aristas (equivalente a ⌊log₂ n⌋).
 - **Comparación:** altura real **6 > 4** mínima teórica → el árbol está **desbalanceado** debido al orden de inserción, lo que explica búsquedas más costosas en ramas profundas (p. ej. San Javier a profundidad 6).
+
+---
+
+### Consultas del índice: mínimo, máximo y rango (v0.1)
+
+**Implementación (`src/ArbolBusqueda.js`):**
+- `minimo()`: sigue siempre al hijo izquierdo hasta el extremo (sin recorrer todo el árbol) → menor código.
+- `maximo()`: sigue siempre al hijo derecho hasta el extremo → mayor código.
+- `rango(desde, hasta)`: recorrido inorden con **poda** — si `nodo.codigo <= desde` no explora la izquierda (no hay valores menores dentro del rango), y si `nodo.codigo >= hasta` no explora la derecha; solo agrega nodos con código en `[desde, hasta]`, devolviéndolos en orden.
+
+**Reporte de consultas (`node src/indice.js`):**
+- Búsquedas por código: `buscar(50)` San Antonio (1 comp.), `buscar(59)` San Javier (7), `buscar(10)` Niquía (4), `buscar(40)` Hospital (3), `buscar(33)` → `null`.
+- `minimo()` → **Niquía (10)**. `maximo()` → **La Estrella (90)**.
+- `rango(10, 30)` (zona norte), en orden: **10 Niquía, 20 Bello, 25 Acevedo, 27 Andalucía, 29 Santo Domingo, 30 Caribe**.
+- Listado completo (inorden): 20 estaciones de 10 a 90.
+- Métricas índice original: altura 6 aristas, 8 hojas.
+
+### Efecto del orden de inserción: árbol degenerado
+
+**Experimento:** se construyó un segundo árbol insertando las 20 estaciones en **orden ascendente de código**:  
+`10 Niquía, 20 Bello, 25 Acevedo, 27 Andalucía, 29 Santo Domingo, 30 Caribe, 35 Universidad, 40 Hospital, 45 Parque Berrío, 50 San Antonio, 52 Cisneros, 54 Suramericana, 56 Estadio, 58 Floresta, 59 San Javier, 60 Exposiciones, 65 Industriales, 70 Poblado, 80 Itagüí, 90 La Estrella`.
+
+**Resultados:**
+- Altura (aristas): **19** → **20 niveles** (uno por estación).
+- `buscar(59)` San Javier: **15 comparaciones**.
+- `buscar(90)` La Estrella: **20 comparaciones**.
+
+**Por qué se degeneró en una lista:** la propiedad del ABB inserta todo código **mayor** que el actual a la derecha. Al llegar los datos ya ordenados de menor a mayor, cada nuevo código es mayor que todos los anteriores, por lo que siempre se inserta como **hijo derecho** del último nodo (que es el máximo actual). Ningún nodo llega a tener hijo izquierdo: la estructura pierde ramificación y colapsa en una cadena lineal hacia la derecha (equivalente a una **lista enlazada**).
+
+**Complejidad:**
+- En este árbol degenerado, la búsqueda debe seguir el único camino descendente nodo a nodo: en el peor caso recorre **n** nodos → **O(n)** en tiempo (y O(n) comparaciones, como 20 para La Estrella con n=20).
+- En un árbol balanceado, la altura es ~log₂(n) y la búsqueda descarta aproximadamente la mitad en cada paso → **O(log n)**. El índice original (altura 6, desbalanceado pero no degenerado) ya muestra costos menores (p. ej. San Javier en 7 comparaciones) que el degenerado (15 para el mismo código).
+
+**Conclusión:** el rendimiento del ABB depende críticamente del **orden de inserción**; cargar datos ordenados degrada la búsqueda de O(log n) a O(n), lo que explica la lentitud reportada y motiva estructuras/estrategias de balanceo.
+
+### Resumen Día 1 (v0.1)
+- Árbol general de la red (`NodoArbol`, `red.js`) y métricas recursivas.
+- ABB por código (`ArbolBusqueda.js`): inserción, búsqueda con comparaciones, recorridos inorden/preorden/postorden, `altura`, `contarHojas`, `minimo`, `maximo`, `rango` con poda.
+- `indice.js`: reporte de consultas (búsquedas, mínimo/máximo, rango 10–30, listado completo) y análisis del árbol degenerado (20 niveles, O(n) vs O(log n)).
+- Bitácora con dibujos, predicciones/verificaciones de recorridos y análisis de degeneración.

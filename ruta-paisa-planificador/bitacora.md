@@ -5,16 +5,11 @@ Las bitácoras detalladas se registran en `docs/` organizada por semana y día:
 - [../docs/semana-4/bitacora-dia-1.md](../docs/semana-4/bitacora-dia-1.md)
 
 ## Día 1 — Árbol general de la red
-- **NodoArbol:** clase con `valor`, arreglo de `hijos` y `agregarHijo(nodo)` (`src/NodoArbol.js`).
-- **Red:** raíz "Red Ruta Paisa", hijos Líneas A/B/K con sus estaciones (22 apariciones) y servicios en San Antonio (Bicicletas públicas, Ascensor) y Poblado (Parqueadero) (`src/red.js`).
-- **Funciones recursivas:** `imprimirArbol(nodo, nivel)`, `contarNodos(nodo)`, `contarHojas(nodo)`, `altura(nodo)`.
-- **Métricas:** 29 nodos, 23 hojas, altura 3 (aristas).
-- **Análisis:** San Antonio y Caribe aparecen en dos líneas → duplicación/inconsistencia en un árbol; alternativa propuesta: **grafo**. Dibujo y terminología en docs.
+- **NodoArbol** (`src/NodoArbol.js`) y red piloto raíz→líneas→estaciones→servicios (`src/red.js`), 22 apariciones de estaciones y 3 servicios.
+- **Recursivos:** `imprimirArbol`, `contarNodos` (29), `contarHojas` (23), `altura` (3). Análisis de estaciones compartidas (San Antonio, Caribe) y alternativa: **grafo**.
 
-## Día 1 (continuación) — Árbol binario de búsqueda (ABB)
-- **`src/ArbolBusqueda.js`:** `NodoBinario(codigo, estacion, izquierdo, derecho)` y `ArbolBusqueda` (`raiz`) con `insertar`, `buscar`, recorridos `inorden/preorden/postorden(callback)`, `altura()` y `contarHojas()`/`contarNodos()`.
-- **Claves repetidas:** si el código ya existe se ignora el duplicado y se conserva la estación original (documentado).
-- **Inserción y búsqueda (20 estaciones):** árbol coincide con el dibujo. Búsquedas: `buscar(50)`→1 comp., `buscar(59)`→7, `buscar(10)`→4, `buscar(40)`→3, `buscar(33)`→`null`. Comparaciones = profundidad + 1.
-- **Recorridos y usos:** inorden → listado ordenado para tableros (10–90, verificado); preorden → exportación/reconstrucción idéntica del árbol; postorden → liberación segura (hijos antes que padre) y conteo. Predicciones en bitácora coinciden con la ejecución (`src/recorridos.js`).
-- **Altura/hojas:** altura 6 aristas (coincide con dibujo), 8 hojas, n=20; mínima teórica `floor(log2(20))=4` → árbol desbalanceado por orden de inserción.
-- **Ejecución:** `node src/ArbolBusqueda.js`, `node src/recorridos.js`.
+## Día 1 — ABB, recorridos y consultas (v0.1)
+- **`ArbolBusqueda.js`:** `NodoBinario`/`ArbolBusqueda` con `insertar` (duplicados ignorados, documentado), `buscar` (comparaciones), recorridos `inorden/preorden/postorden`, `altura`, `contarHojas/Nodos`, `minimo`, `maximo`, `rango` con poda.
+- **Verificaciones:** búsquedas 50→1, 59→7, 10→4, 40→3, 33→`null`; inorden 10–90; preorden reconstruye misma forma; postorden para conteo/liberación segura; `minimo` Niquía (10), `maximo` La Estrella (90), `rango(10,30)` = Niquía, Bello, Acevedo, Andalucía, Santo Domingo, Caribe.
+- **Árbol degenerado:** inserción ascendente → 20 niveles (altura 19), `buscar(59)`=15 comp., `buscar(90)`=20 comp.; explicación de degeneración a lista y complejidad O(n) vs O(log n).
+- **Índice:** `src/indice.js` (`npm start`) con reporte completo de consultas. Detalle, dibujos y predicciones en `docs/semana-4/bitacora-dia-1.md`.
