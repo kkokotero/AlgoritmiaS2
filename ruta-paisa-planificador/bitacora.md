@@ -17,6 +17,5 @@ Las bitácoras detalladas se registran en `docs/` organizada por semana y día:
 
 ## Día 2 — Grafo de la red (líneas A, B, K, T)
 - **`Grafo.js`:** grafo no dirigido con lista de adyacencia (`Map`), `agregarEstacion`, `conectar` (ambos sentidos, sin duplicar), `vecinos`, `grado`, conteo V/E.
-- **`red.js`:** construcción desde líneas (pares consecutivos = conexión), traducción de códigos a nombres con el índice del Día 1.
-- **Resultados:** V=20 estaciones, E=21 conexiones; transbordos (grado>2): Caribe(30), Hospital(40), San Antonio(50), Industriales(65), Estadio(56). Dibujo y lista de adyacencia coinciden.
-- **Análisis:** grafo resuelve estaciones compartidas (vértice único, sin duplicación) y comparación lista vs matriz de adyacencia justificada (red dispersa: O(V+E) y vecinos por grado real). Detalle en `docs/semana-4/bitacora-dia-2.md`.
+- **`red.js`:** construcción desde líneas (pares consecutivos = conexión), traducción de códigos a nombres con el índice del Día 1. V=20, E=21; transbordos: Caribe, Hospital, San Antonio, Industriales, Estadio.
+- **DFS y cierres (`Grafo.js`, `cierres.js`):** `dfs` recursivo e iterativo con `Set` de visitados y `cerradas`, `componentes(cerradas)`. Red completa: alcanza 20 desde cualquier origen y recursivo/iterativo mismo conjunto. Cierre de Estadio (56): 2 componentes, aisladas **Floresta (58) y San Javier (59)**. 11 estaciones críticas identificadas y justificadas. Traza DFS desde Santo Domingo (6 pasos, pila) y complejidad O(V+E) en bitácora.

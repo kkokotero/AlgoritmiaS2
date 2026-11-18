@@ -58,8 +58,9 @@ ruta-paisa-planificador/
 ├── src/
 │   ├── NodoArbol.js       # Árbol general (valor, hijos, agregarHijo)
 │   ├── redArbol.js        # Construcción de la red como árbol general y funciones recursivas
-│   ├── Grafo.js           # Grafo no dirigido con lista de adyacencia (Map)
+│   ├── Grafo.js           # Grafo no dirigido con lista de adyacencia (Map) y DFS/componentes
 │   ├── red.js             # Construcción del grafo de la red (líneas A,B,K,T)
+│   ├── cierres.js         # Análisis de cierres: alcanzabilidad, componentes y estaciones críticas
 │   ├── ArbolBusqueda.js   # ABB: NodoBinario, insertar, buscar, recorridos, min/max, rango, métricas
 │   ├── recorridos.js      # Verificación de recorridos y reconstrucción
 │   └── indice.js          # Índice v0.1 y reporte de consultas

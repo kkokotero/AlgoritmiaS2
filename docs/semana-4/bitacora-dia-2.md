@@ -106,3 +106,61 @@ Sea V = 20 estaciones y E = 21 conexiones (grafo no dirigido, disperso).
 | **Agregar conexión** | O(1) amortizado (agregar a las listas, verificando duplicado) | O(1) (marcar dos celdas simétricas) |
 
 **Justificación para esta red:** con V=20 y E=21 el grafo es **muy disperso** (grado promedio 2.1). La **lista de adyacencia** es más adecuada: usa mucha menos memoria (~62 frente a 400 celdas) y consultar vecinos —operación central para recorridos y rutas— es proporcional al grado real (1–4) en lugar de recorrer siempre 20 posiciones como en la matriz. La matriz solo aventajaría si se requirieran muchas consultas de existencia de arista puntual O(1) o si el grafo fuera denso, lo que no es el caso de la red de transporte.
+
+---
+
+## DFS, componentes conectados y estaciones críticas (cierres)
+
+### Implementación
+- `src/Grafo.js`: se agregaron `dfs(inicio, cerradas)` (recursivo, con `Set` de visitados, devuelve estaciones alcanzables sin pasar por estaciones cerradas), `dfsIterativo(inicio, cerradas)` (pila explícita, mismo conjunto alcanzable) y `componentes(cerradas)` (grupos de estaciones conectadas entre sí excluyendo cerradas).
+- `src/cierres.js` (`node src/cierres.js`): verificaciones de alcanzabilidad, comparación recursivo/iterativo, simulación del cierre de Estadio y listado de estaciones críticas con los componentes que genera cada cierre.
+
+**Complejidad:** DFS visita cada vértice alcanzable una sola vez (control con `Set` de visitados) y recorre cada arista incidente al explorar vecinos, por lo que su complejidad es **O(V + E)** en tiempo (y O(V) en espacio auxiliar para visitados/pila/recursión). El cálculo de componentes repite este proceso sobre vértices no visitados cubriendo el grafo completo: **O(V + E)** en total.
+
+### Traza DFS desde Santo Domingo (29) con la red completa
+Lista de adyacencia relevante (orden de vecinos según el grafo construido): 29→[27], 27→[25,29], 25→[30,27], 30→[20,35,25], 20→[10,30], 10→[20], 35→[30,40], ...
+
+Estado: `visitados` (Set), `resultado` (orden de visita), `Pila de llamadas` (tope a la derecha). La recursión explora los vecinos en el orden de la lista de adyacencia.
+
+| Paso | Evento (llamada/retorno) | actual | Acción / vecinos considerados | visitados | resultado (orden visita) | Pila de llamadas |
+|---:|---|---:|---|---|---|---|
+| 1 | Llamada inicial `dfs(29)` | 29 | 29 no visitado ni cerrado → marcar y agregar | {29} | [29] | [dfs(29)] |
+| 2 | Explora vecinos de 29: [27] | 29 | 27 libre → llamada recursiva | {29} | [29] | [dfs(29), dfs(27)] |
+| 3 | Entra a `dfs(27)` | 27 | marcar y agregar; vecinos [25,29]; 29 ya visitado, 25 libre | {29,27} | [29,27] | [dfs(29), dfs(27)] → llama 25 ⇒ [dfs(29), dfs(27), dfs(25)] |
+| 4 | Entra a `dfs(25)` | 25 | marcar y agregar; vecinos [30,27]; 27 visitado, 30 libre | {29,27,25} | [29,27,25] | [dfs(29), dfs(27), dfs(25), dfs(30)] |
+| 5 | Entra a `dfs(30)` | 30 | marcar y agregar; vecinos [20,35,25]; 25 visitado, 20 libre (primero) | {29,27,25,30} | [29,27,25,30] | [dfs(29), dfs(27), dfs(25), dfs(30), dfs(20)] |
+| 6 | Entra a `dfs(20)` | 20 | marcar y agregar; vecinos [10,30]; 30 visitado, 10 libre | {29,27,25,30,20} | [29,27,25,30,20] | [dfs(29), dfs(27), dfs(25), dfs(30), dfs(20), dfs(10)] |
+
+(Evolución posterior: `dfs(10)` agrega 10 y retorna por no tener vecinos libres; `dfs(20)` termina y `dfs(30)` continúa con el vecino 35, etc., hasta visitar las 20 estaciones y desapilar todas las llamadas.)
+
+**Orden completo obtenido (recursivo/iterativo, mismo conjunto):** [29, 27, 25, 30, 20, 10, 35, 40, 45, 50, 60, 65, 70, 80, 90, 56, 54, 52, 58, 59] — 20 estaciones alcanzables.
+
+### Verificaciones
+- **Red completa:** DFS desde **cualquier** estación alcanza las **20 estaciones** (verificado para todos los orígenes).
+- **Recursivo vs iterativo:** ambas versiones encuentran el **mismo conjunto** de estaciones alcanzables desde todas las estaciones (el orden de visita coincide al apilar vecinos en orden inverso en la versión iterativa).
+
+### Simulación: cierre de Estadio (56)
+Al cerrar Estadio (`cerradas={56}`), `componentes` devuelve **2 componentes**:
+1. **Componente principal (17 estaciones):** Acevedo (25), Andalucía (27), Bello (20), Caribe (30), Cisneros (52), Exposiciones (60), Hospital (40), Industriales (65), Itagüí (80), La Estrella (90), Niquía (10), Parque Berrío (45), Poblado (70), San Antonio (50), Santo Domingo (29), Suramericana (54), Universidad (35).
+2. **Componente aislado (2 estaciones):** **Floresta (58), San Javier (59)**.
+
+**Estaciones que quedan aisladas del resto de la red:** **Floresta (58) y San Javier (59)** (la línea B hacia el occidente dependía del paso por Estadio 56 para conectarse al resto; al cerrarse 56 se pierde ese único enlace).
+
+### Estaciones críticas (su cierre divide la red en 2 o más componentes)
+Se cerró una estación a la vez (todas las demás operativas) y se contaron los componentes resultantes. **11 estaciones críticas**:
+
+| Estación crítica (cód.) | # Comp. | Componentes generados por su cierre (justificación) |
+|---|---:|---|
+| Bello (20) | 2 | {Niquía(10)} aislada del resto {Acevedo, Andalucía, Santo Domingo, Caribe, Universidad, Hospital, Parque Berrío, San Antonio, Cisneros, Suramericana, Estadio, Floresta, San Javier, Exposiciones, Industriales, Poblado, Itagüí, La Estrella}. |
+| Acevedo (25) | 2 | {Andalucía(27), Santo Domingo(29)} separados del resto de la red. |
+| Andalucía (27) | 2 | {Santo Domingo(29)} queda aislada (nodo terminal de la rama K). |
+| Caribe (30) | 3 | Parte la red en 3: {Niquía,Bello} (tramo A norte), {Acevedo,Andalucía,Santo Domingo} (rama K) y el bloque restante {Universidad..La Estrella}. |
+| Universidad (35) | 2 | Separa {Niquía,Bello,Acevedo,Andalucía,Santo Domingo,Caribe} del resto hacia el sur. |
+| Hospital (40) | 2 | Separa {Niquía,Bello,Acevedo,Andalucía,Santo Domingo,Caribe,Universidad} del resto (corta el tramo A y la conexión con T/56). |
+| Estadio (56) | 2 | {Floresta(58), San Javier(59)} aisladas del resto (cierre del acceso B-occidente y del paso por T). |
+| Floresta (58) | 2 | {San Javier(59)} aislada del resto. |
+| Industriales (65) | 2 | {Poblado, Itagüí, La Estrella} separados del resto (corta A sur y la conexión T con Estadio). |
+| Poblado (70) | 2 | {Itagüí(80), La Estrella(90)} separados del resto. |
+| Itagüí (80) | 2 | {La Estrella(90)} aislada (terminal de la línea A). |
+
+Estas estaciones son puntos de articulación/cortes de la red piloto: su cierre (grado efectivo de conexión único entre subredes o nodos terminales encadenados) desconecta componentes, por lo que requieren planes de contingencia (buses de apoyo) ante cierres.

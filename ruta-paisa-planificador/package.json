@@ -7,6 +7,7 @@
     "start": "node src/indice.js",
     "indice": "node src/indice.js",
     "grafo": "node src/red.js",
+    "cierres": "node src/cierres.js",
     "arbol": "node src/redArbol.js",
     "abb": "node src/ArbolBusqueda.js",
     "recorridos": "node src/recorridos.js"
