@@ -11,9 +11,10 @@ Proyecto para modelar la red piloto **Ruta Paisa** como un **árbol general** (j
 ```
 ruta-paisa-planificador/
 ├── src/
-│   ├── NodoArbol.js   # Clase NodoArbol (valor, hijos, agregarHijo)
-│   └── red.js         # Construcción de la red y funciones recursivas
-├── bitacora.md        # Bitácora (dibujo, métricas y análisis)
+│   ├── NodoArbol.js       # Clase NodoArbol (valor, hijos, agregarHijo)
+│   ├── red.js             # Árbol general de la red y funciones recursivas
+│   └── ArbolBusqueda.js   # ABB por código: NodoBinario, insertar y buscar
+├── bitacora.md            # Bitácora (dibujos, métricas y análisis)
 ├── jsconfig.json
 ├── package.json
 └── README.md
@@ -23,12 +24,17 @@ ruta-paisa-planificador/
 Desde la carpeta `ruta-paisa-planificador/`:
 
 ```bash
+# Árbol general de la red y métricas recursivas
 node src/red.js
 # o
 npm start
+
+# Árbol binario de búsqueda por código de estación (inserción y búsqueda)
+node src/ArbolBusqueda.js
 ```
 
-**Salida esperada:** impresión del árbol con sangría (3 niveles para líneas, estaciones y servicios) y métricas recursivas: `contarNodos`, `contarHojas` y `altura`.
+**Salida esperada (`red.js`):** impresión del árbol con sangría (3 niveles para líneas, estaciones y servicios) y métricas recursivas: `contarNodos`, `contarHojas` y `altura`.  
+**Salida esperada (`ArbolBusqueda.js`):** inserción de 20 estaciones y resultados de búsqueda (estación y comparaciones) para San Antonio (1), San Javier (7), Niquía (4), Hospital (3) y código 33 inexistente (`null`).
 
 ## Red piloto modelada
 - **Línea A:** Niquía (10), Bello (20), Caribe (30), Universidad (35), Hospital (40), Parque Berrío (45), San Antonio (50), Exposiciones (60), Industriales (65), Poblado (70), Itagüí (80), La Estrella (90)

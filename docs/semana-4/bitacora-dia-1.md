@@ -81,3 +81,53 @@ Red Ruta Paisa                                          [nodo interno, raíz]
 - **Ambigüedad para recorridos/rutas:** al planificar trayectos, no es trivial reconocer que se puede cambiar de línea en una estación compartida porque estructuralmente son nodos separados.
 
 **Estructura alternativa (anticipación):** un **grafo** (red/grafo no dirigido o dirigido, posiblemente etiquetado por línea) donde las estaciones se modelan como **vértices únicos** y las conexiones entre estaciones consecutivas como **aristas**. Una estación de transferencia tendría aristas hacia estaciones de distintas líneas, representando naturalmente que es el mismo nodo compartido sin duplicación. Esto facilitará modelar adyacencias, transbordos y el cálculo de rutas en las siguientes etapas del planificador.
+
+---
+
+## Día 1 (continuación): Árbol binario de búsqueda (ABB) de estaciones
+
+### Contexto
+Las estaciones se identifican por código numérico y se requiere búsqueda eficiente por código. Se modela un **árbol binario de búsqueda**: códigos menores a la izquierda y mayores a la derecha.
+
+**Orden de inserción (20 estaciones):**  
+50 San Antonio, 30 Caribe, 70 Poblado, 20 Bello, 40 Hospital, 60 Exposiciones, 80 Itagüí, 10 Niquía, 25 Acevedo, 35 Universidad, 45 Parque Berrío, 52 Cisneros, 56 Estadio, 65 Industriales, 90 La Estrella, 27 Andalucía, 29 Santo Domingo, 54 Suramericana, 58 Floresta, 59 San Javier.
+
+### Implementación (`src/ArbolBusqueda.js`)
+- `NodoBinario(codigo, estacion, izquierdo, derecho)`: almacena la clave `codigo`, el nombre `estacion` y referencias `izquierdo`/`derecho` (inicialmente `null`).
+- `ArbolBusqueda` con propiedad `raiz`.
+- `insertar(codigo, estacion)` (iterativa): respeta la propiedad de orden (menor → izquierda, mayor → derecha). **Códigos repetidos:** si el código ya existe en el árbol, **no se crea un nuevo nodo y se conserva la estación registrada originalmente** (el duplicado se ignora). Decisión documentada en el código para evitar sobrescribir datos sin intención y mantener una única entrada por clave.
+- `buscar(codigo)`: recorre desde la raíz comparando la clave; devuelve `{ estacion, comparaciones }` si la encuentra, o `null` si no existe (sin errores).
+
+### Dibujo del ABB resultante (inserción en el orden dado)
+
+```text
+(nivel 0)                        50 San Antonio
+                                /               \
+(nivel 1)                30 Caribe             70 Poblado
+                        /         \           /           \
+(nivel 2)          20 Bello    40 Hospital  60 Expos.    80 Itagüí
+                  /      \      /      \    /       \          \
+(nivel 3)   10 Niquía  25 Acevedo 35 Univ. 45 P.Berrío 52 Cisneros 65 Industriales  90 La Estrella
+                          \                              \
+(nivel 4)             27 Andalucía                    56 Estadio
+                            \                          /         \
+(nivel 5)            29 Santo Domingo           54 Suram.    58 Floresta
+                                                                  \
+(nivel 6)                                                    59 San Javier
+```
+
+El árbol construido por el programa (`node src/ArbolBusqueda.js`) coincide con este dibujo: 20 estaciones insertadas, mismo padre e hijos para cada nodo según la propiedad de orden.
+
+### Búsquedas, comparaciones y relación con la profundidad
+
+En cada paso se realiza **1 comparación** de igualdad (y se decide ir a izquierda/derecha si no coincide). Por tanto, **comparaciones = profundidad del nodo + 1** (contando la raíz en profundidad 0). Si el código no existe, se comparan todos los nodos del camino hasta llegar a una referencia `null`.
+
+| Búsqueda (código) | Estación | Resultado | Comparaciones | Camino (nodos comparados) | Profundidad en el dibujo |
+|---:|---|---|---:|---|---:|
+| 50 | San Antonio | encontrada | 1 | 50 | 0 (raíz) |
+| 59 | San Javier | encontrada | 7 | 50 → 70 → 60 → 52 → 56 → 58 → 59 | 6 |
+| 10 | Niquía | encontrada | 4 | 50 → 30 → 20 → 10 | 3 |
+| 40 | Hospital (intermedia) | encontrada | 3 | 50 → 30 → 40 | 2 |
+| 33 | (inexistente) | `null` | 4 | 50 → 30 → 40 → 35 → `null` | — (ausente; caería como hijo izq. de 35) |
+
+**Relación observada:** las comparaciones coinciden con `profundidad + 1` para las estaciones presentes (50: 0+1=1, 40: 2+1=3, 10: 3+1=4, 59: 6+1=7). Para el código inexistente 33, la búsqueda realiza 4 comparaciones siguiendo el camino dictado por la propiedad de orden hasta alcanzar un enlace nulo, confirmando su ausencia sin errores. Esto evidencia que el costo de búsqueda en un ABB depende de la altura/profundidad del nodo, determinada por el orden de inserción.
