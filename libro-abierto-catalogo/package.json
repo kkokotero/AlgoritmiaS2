@@ -4,7 +4,8 @@
   "description": "Motor de búsqueda y ordenamiento del catálogo Libro Abierto (Semana 3)",
   "main": "src/explorar.js",
   "scripts": {
-    "explorar": "node src/explorar.js"
+    "explorar": "node src/explorar.js",
+    "busqueda": "node src/medirBusqueda.js"
   },
   "keywords": [],
   "author": "",
