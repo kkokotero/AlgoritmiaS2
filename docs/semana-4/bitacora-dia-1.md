@@ -131,3 +131,36 @@ En cada paso se realiza **1 comparación** de igualdad (y se decide ir a izquier
 | 33 | (inexistente) | `null` | 4 | 50 → 30 → 40 → 35 → `null` | — (ausente; caería como hijo izq. de 35) |
 
 **Relación observada:** las comparaciones coinciden con `profundidad + 1` para las estaciones presentes (50: 0+1=1, 40: 2+1=3, 10: 3+1=4, 59: 6+1=7). Para el código inexistente 33, la búsqueda realiza 4 comparaciones siguiendo el camino dictado por la propiedad de orden hasta alcanzar un enlace nulo, confirmando su ausencia sin errores. Esto evidencia que el costo de búsqueda en un ABB depende de la altura/profundidad del nodo, determinada por el orden de inserción.
+
+---
+
+### Recorridos en profundidad (inorden, preorden, postorden), altura y hojas
+
+**Predicciones (según el dibujo del ABB, antes de ejecutar los recorridos):**
+
+- **Inorden** (izquierdo, raíz, derecho) — debe producir los códigos en orden ascendente:  
+  `10, 20, 25, 27, 29, 30, 35, 40, 45, 50, 52, 54, 56, 58, 59, 60, 65, 70, 80, 90`
+- **Preorden** (raíz, izquierdo, derecho) — útil para exportar y reconstruir la misma forma:  
+  `50, 30, 20, 10, 25, 27, 29, 40, 35, 45, 70, 60, 52, 56, 54, 58, 59, 65, 80, 90`
+- **Postorden** (izquierdo, derecho, raíz) — procesa hijos antes que el padre:  
+  `10, 29, 27, 25, 20, 35, 45, 40, 30, 54, 59, 58, 56, 52, 65, 60, 90, 80, 70, 50`
+
+**Verificación con el programa (`node src/recorridos.js`):** las tres secuencias obtenidas coinciden exactamente con las predicciones.
+
+| Recorrido | Secuencia obtenida (códigos) | Coincide con predicción |
+|---|---|:---:|
+| Inorden (20) | 10, 20, 25, 27, 29, 30, 35, 40, 45, 50, 52, 54, 56, 58, 59, 60, 65, 70, 80, 90 | Sí |
+| Preorden (20) | 50, 30, 20, 10, 25, 27, 29, 40, 35, 45, 70, 60, 52, 56, 54, 58, 59, 65, 80, 90 | Sí |
+| Postorden (20) | 10, 29, 27, 25, 20, 35, 45, 40, 30, 54, 59, 58, 56, 52, 65, 60, 90, 80, 70, 50 | Sí |
+
+**Usos en Ruta Paisa (asociación por recorrido):**
+- **Inorden → listado ordenado por código para tableros informativos:** en un ABB, el inorden visita los nodos en orden ascendente de clave. Verificación: produce los **20 códigos en orden ascendente de 10 a 90**.
+- **Preorden → exportar el índice para reconstruirlo idéntico en otro servidor:** al listar raíz antes que sus subárboles, al insertar los códigos en ese mismo orden en un ABB vacío se recrea la misma estructura. Verificación: exportación `[50,30,20,10,25,27,29,40,35,45,70,60,52,56,54,58,59,65,80,90]`, árbol reconstruido con **exactamente la misma forma** que el original (preorden e inorden idénticos).
+- **Postorden → recorrido seguro para liberar el índice al reiniciar el sistema:** procesa primero subárbol izquierdo y derecho y **al final el padre**, garantizando que un nodo se libere solo cuando sus hijos ya fueron procesados (evita perder referencias a subárboles). También permite contar nodos agregando al visitar cada uno (postorden: 20 nodos, igual a `contarNodos()`).
+
+**Altura y hojas (`altura()`, `contarHojas()`):**
+- Altura (en aristas): **6** — coincide con el dibujo (camino más largo 50→70→60→52→56→58→59, de nivel 0 a 6).
+- Hojas: **8**.
+- Nodos (n): **20**.
+- Altura mínima posible para 20 nodos (árbol binario lo más balanceado): `floor(log2(n)) = floor(log2(20)) = 4` aristas (equivalente a ⌊log₂ n⌋).
+- **Comparación:** altura real **6 > 4** mínima teórica → el árbol está **desbalanceado** debido al orden de inserción, lo que explica búsquedas más costosas en ramas profundas (p. ej. San Javier a profundidad 6).

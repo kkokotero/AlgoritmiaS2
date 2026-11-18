@@ -88,6 +88,112 @@ class ArbolBusqueda {
 
     return null;
   }
+
+  /**
+   * Recorrido inorden (izquierdo, raíz, derecho).
+   * @param {(nodo: NodoBinario) => void} callback - Función a ejecutar por nodo.
+   * @returns {void}
+   */
+  inorden(callback) {
+    /**
+     * @param {NodoBinario | null} nodo
+     */
+    const recorrer = (nodo) => {
+      if (nodo === null) return;
+      recorrer(nodo.izquierdo);
+      callback(nodo);
+      recorrer(nodo.derecho);
+    };
+    recorrer(this.raiz);
+  }
+
+  /**
+   * Recorrido preorden (raíz, izquierdo, derecho).
+   * @param {(nodo: NodoBinario) => void} callback - Función a ejecutar por nodo.
+   * @returns {void}
+   */
+  preorden(callback) {
+    /**
+     * @param {NodoBinario | null} nodo
+     */
+    const recorrer = (nodo) => {
+      if (nodo === null) return;
+      callback(nodo);
+      recorrer(nodo.izquierdo);
+      recorrer(nodo.derecho);
+    };
+    recorrer(this.raiz);
+  }
+
+  /**
+   * Recorrido postorden (izquierdo, derecho, raíz).
+   * @param {(nodo: NodoBinario) => void} callback - Función a ejecutar por nodo.
+   * @returns {void}
+   */
+  postorden(callback) {
+    /**
+     * @param {NodoBinario | null} nodo
+     */
+    const recorrer = (nodo) => {
+      if (nodo === null) return;
+      recorrer(nodo.izquierdo);
+      recorrer(nodo.derecho);
+      callback(nodo);
+    };
+    recorrer(this.raiz);
+  }
+
+  /**
+   * Calcula la altura del árbol en número de aristas (recursivo).
+   * Árbol vacío: -1. Hoja: 0.
+   * @returns {number}
+   */
+  altura() {
+    /**
+     * @param {NodoBinario | null} nodo
+     * @returns {number}
+     */
+    const calcular = (nodo) => {
+      if (nodo === null) return -1;
+      const altIzq = calcular(nodo.izquierdo);
+      const altDer = calcular(nodo.derecho);
+      return 1 + (altIzq > altDer ? altIzq : altDer);
+    };
+    return calcular(this.raiz);
+  }
+
+  /**
+   * Cuenta las hojas del árbol (nodos sin hijos), recursivo.
+   * @returns {number}
+   */
+  contarHojas() {
+    /**
+     * @param {NodoBinario | null} nodo
+     * @returns {number}
+     */
+    const contar = (nodo) => {
+      if (nodo === null) return 0;
+      if (nodo.izquierdo === null && nodo.derecho === null) return 1;
+      return contar(nodo.izquierdo) + contar(nodo.derecho);
+    };
+    return contar(this.raiz);
+  }
+
+  /**
+   * Cuenta el total de nodos del árbol.
+   * @returns {number}
+   */
+  contarNodos() {
+    /**
+     * @param {NodoBinario | null} nodo
+     * @returns {number}
+     */
+    const contar = (nodo) => {
+      if (nodo === null) return 0;
+      return 1 + contar(nodo.izquierdo) + contar(nodo.derecho);
+    };
+    return contar(this.raiz);
+  }
 }
 
 if (require.main === module) {

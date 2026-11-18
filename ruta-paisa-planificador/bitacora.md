@@ -12,7 +12,9 @@ Las bitácoras detalladas se registran en `docs/` organizada por semana y día:
 - **Análisis:** San Antonio y Caribe aparecen en dos líneas → duplicación/inconsistencia en un árbol; alternativa propuesta: **grafo**. Dibujo y terminología en docs.
 
 ## Día 1 (continuación) — Árbol binario de búsqueda (ABB)
-- **`src/ArbolBusqueda.js`:** `NodoBinario(codigo, estacion, izquierdo, derecho)` y `ArbolBusqueda` (`raiz`) con `insertar(codigo, estacion)` iterativo y `buscar(codigo)` → `{estacion, comparaciones}` o `null`.
+- **`src/ArbolBusqueda.js`:** `NodoBinario(codigo, estacion, izquierdo, derecho)` y `ArbolBusqueda` (`raiz`) con `insertar`, `buscar`, recorridos `inorden/preorden/postorden(callback)`, `altura()` y `contarHojas()`/`contarNodos()`.
 - **Claves repetidas:** si el código ya existe se ignora el duplicado y se conserva la estación original (documentado).
-- **Inserción (20 estaciones):** árbol coincide con el dibujo de la bitácora. Búsquedas: `buscar(50)`→1 comp., `buscar(59)`→7, `buscar(10)`→4, `buscar(40)`→3, `buscar(33)`→`null` (4 comparaciones). Comparaciones = profundidad + 1.
-- **Ejecución:** `node src/ArbolBusqueda.js`.
+- **Inserción y búsqueda (20 estaciones):** árbol coincide con el dibujo. Búsquedas: `buscar(50)`→1 comp., `buscar(59)`→7, `buscar(10)`→4, `buscar(40)`→3, `buscar(33)`→`null`. Comparaciones = profundidad + 1.
+- **Recorridos y usos:** inorden → listado ordenado para tableros (10–90, verificado); preorden → exportación/reconstrucción idéntica del árbol; postorden → liberación segura (hijos antes que padre) y conteo. Predicciones en bitácora coinciden con la ejecución (`src/recorridos.js`).
+- **Altura/hojas:** altura 6 aristas (coincide con dibujo), 8 hojas, n=20; mínima teórica `floor(log2(20))=4` → árbol desbalanceado por orden de inserción.
+- **Ejecución:** `node src/ArbolBusqueda.js`, `node src/recorridos.js`.
