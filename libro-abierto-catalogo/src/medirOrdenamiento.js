@@ -4,7 +4,7 @@
  */
 
 const { generarCatalogo, casiOrdenado } = require("./generador");
-const { bubbleSort, selectionSort, insertionSort } = require("./ordenamiento");
+const { bubbleSort, selectionSort, insertionSort, mergeSort } = require("./ordenamiento");
 
 /**
  * @param {number} a
@@ -64,8 +64,8 @@ const n = 2000;
 
 // Preparar estados
 const aleatorio = generarCatalogo(n);
-const ordenado = generarCatalogo(n).sort((a, b) => a.anio - b.anio);
-const invertido = generarCatalogo(n).sort((a, b) => b.anio - a.anio);
+const ordenado = mergeSort(generarCatalogo(n), compararPorAnio).arreglo;
+const invertido = mergeSort(generarCatalogo(n), (a, b) => b.anio - a.anio).arreglo;
 const casi = casiOrdenado(n, 20);
 
 const estados = [

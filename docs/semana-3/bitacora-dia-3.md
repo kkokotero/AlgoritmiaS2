@@ -232,3 +232,40 @@ Resultado con **Quick Sort** (pivote fijo): Laura (Delirio, Dulce compañía, La
 - `src/topk.js`, `src/medirTopK.js` (Top-K y comparación O(n log n) vs O(k·n))
 - `src/autocompletar.js`, `src/probarAutocompletar.js` (orden por título normalizado, lower bound, autocompletar y pruebas)
 - `src/ordenamiento.js` (`mergeSort`, `porPrestamosDesc`), `src/comparadores.js`
+
+---
+
+## Día 3 (integración final): Catálogo Libro Abierto v1.0
+
+### Integración del producto
+- `src/catalogo.js` (v1.0): demostración completa con un solo comando (`node src/catalogo.js`) sin usar `sort` del lenguaje. Usa **Merge Sort** propio para preparar copias ordenadas por **ISBN** (`ordenarPorIsbn` en `busquedaBinaria.js`) y por **título** normalizado (`ordenarPorTitulo` en `autocompletar.js`), y **búsqueda binaria** para consultas por ISBN/primera ocurrencia y para el autocompletar (lower bound). 
+- `src/generador.js` y `src/busquedaBinaria.js` actualizados para no depender de `Array.prototype.sort` (ordenan con Merge Sort).
+- Demostración incluye: consultas por **título, autor e ISBN** (con algoritmo y comparaciones), **top 10** de más prestados (Merge Sort por préstamos desc), **tres ejemplos de autocompletar** (prefijo frecuente, específico y sin resultados, con posición inicial/revisados) y **catálogo de exhibición ordenado por año** (Merge Sort + `porAnio`).
+
+### Laboratorio de rendimiento v1.0 (`src/laboratorio.js`)
+Compara cinco algoritmos: **Bubble Sort, Selection Sort, Insertion Sort, Merge Sort y Quick Sort (aleatorio)** con **1.000, 10.000 y 100.000** libros (los algoritmos básicos solo hasta 10.000). Estados: aleatorio, ordenado, invertido y casi ordenado (100.000 en aleatorio para avanzados). Verificación automática de orden (**OK/FALLA**).
+
+**Resultados clave:**
+- Todos los casos evaluados: **OK** (sin FALLA).
+- **100.000 libros (aleatorio):** Merge Sort **39.128 ms**, Quick Sort (aleatorio) **102.779 ms** — ambos **< 1 segundo**.
+- Los O(n²) escalan rápidamente (10.000 aleatorios: Bubble ~177 ms, Selection ~106 ms, Insertion ~54 ms) y se omiten en 100.000 por costo; los O(n log n) se mantienen eficientes y estables.
+
+### Resumen de los 12 MiniRetos de la semana
+
+| # | MiniReto | Qué se construyó | Aporte al producto v1.0 |
+|---:|---|---|---|
+| 1 | Estantería digital | Modelo `Libro` (isbn string 13 dígitos, titulo, autor, anio, prestamos), muestra y `generarCatalogo(n)` con ISBN únicos/opción de copias; verificación con 10.000. | Datos base y generador de catálogos (`src/muestra.js`, `src/generador.js`, `src/explorar.js`). |
+| 2 | Buscar sin orden | Búsqueda lineal por título (retorno temprano, normalización), autor y palabra con conteo de comparaciones y traza. | Consultas por texto y referencia de costo O(n) (`src/busqueda.js`). |
+| 3 | Buscar en orden | Búsqueda binaria iterativa y recursiva por ISBN (localeCompare, Math.floor), trazas y comparación con lineal (≤20 comp. en 1.000.000). | Consulta por ISBN eficiente O(log n) (`src/busquedaBinaria.js`). |
+| 4 | Libro Abierto v0.1 | Buscador integrado (10.000 libros, copia ordenada por ISBN), reporte de consultas, `primeraPosicionIsbn` para copias y tabla de decisión de algoritmos. | Primera versión del buscador y arquitectura de consultas (`src/catalogo.js`, bitácora/README v0.1). |
+| 5 | Bubble Sort | `bubbleSort` con contadores (comparaciones, intercambios, desplazamientos, pasadas), traza y medición base. | Algoritmo base O(n²) y línea de referencia del laboratorio (`src/ordenamiento.js`). |
+| 6 | Selección e inserción | `selectionSort` (mínimo) e `insertionSort` (desplazamiento), `casiOrdenado(n,cambios)` y mediciones en 4 estados; análisis de comportamiento. | Algoritmos alternativos y evidencia de impacto del estado inicial. |
+| 7 | Comparadores y estabilidad | Comparadores compuestos (`porAutorYTitulo`, `localeCompare` sensitivity:"base"), `porPrestamosDesc`, `invertir`; experimento de estabilidad con trazas. | Criterios múltiples y verificación de estabilidad (`src/comparadores.js`, `src/medirEstabilidad.js`). |
+| 8 | Libro Abierto v0.2 | Laboratorio de rendimiento (tamaños/estados, `console.table`, verificación), crecimiento ~×4 al duplicar n y recomendaciones de uso. | Herramienta de medición y decisiones por proceso (`src/laboratorio.js`, README v0.2). |
+| 9 | Merge Sort | `mezclar` (dos índices, estable) y `mergeSort` recursivo (divide/mezcla), árbol de ejecución, comparaciones < n·log₂(n) y prueba de estabilidad. | Ordenamiento O(n log n) estable para copias/ranking/exhibición (`src/ordenamiento.js`, `src/medirMergeSort.js`). |
+| 10 | Quick Sort y el pivote | `particion` Lomuto en el lugar y `quickSort` (pivote fijo) + `quickSortAleatorio`; traza, peor caso O(n²) con datos ordenados y corrección con pivote aleatorio; estabilidad. | Alternativa in-place eficiente y análisis de riesgos del pivote (`src/medirQuickSort.js`). |
+| 11 | Más prestados y autocompletar | `topPrestados` (Merge Sort, O(n log n)) vs `topPrestadosSeleccion` (O(k·n)); autocompletar por prefijo con título normalizado, `primeraPosicionPrefijo` (lower bound) y O(log n + k), con casos borde. | Ranking “Lo que más lee el Valle” y sugerencias de búsqueda (`src/topk.js`, `src/autocompletar.js`). |
+| 12 | Libro Abierto v1.0 | Integración sin `sort` nativo (Merge Sort para copias, binaria para ISBN/autocompletar), demo completa, laboratorio 5 algoritmos (1k/10k/100k, básicos≤10k), README de producto y cierre de bitácora. | Producto final presentable, medido y documentado. |
+
+### Cierre
+El catálogo v1.0 integra búsqueda, ordenamiento, ranking y autocompletar respaldados por mediciones (trazas, tablas de comparaciones, experimentos de estabilidad y laboratorio). Las decisiones técnicas priorizan algoritmos estables y O(n log n) garantizados para procesos masivos, adaptativos para datos casi ordenados y soluciones O(log n + k) para interacción en tiempo real.

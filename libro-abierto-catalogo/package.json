@@ -1,9 +1,12 @@
 {
   "name": "libro-abierto-catalogo",
-  "version": "0.3.0",
-  "description": "Motor de búsqueda y ordenamiento del catálogo Libro Abierto (Semana 3)",
-  "main": "src/explorar.js",
+  "version": "1.0.0",
+  "description": "Catálogo Libro Abierto v1.0: búsqueda, ordenamiento, ranking y autocompletar (Semana 3)",
+  "main": "src/catalogo.js",
   "scripts": {
+    "catalogo": "node src/catalogo.js",
+    "start": "node src/catalogo.js",
+    "laboratorio": "node src/laboratorio.js",
     "explorar": "node src/explorar.js",
     "busqueda": "node src/medirBusqueda.js",
     "binaria": "node src/comparacionBinaria.js",
@@ -12,10 +15,7 @@
     "merge": "node src/medirMergeSort.js",
     "quick": "node src/medirQuickSort.js",
     "topk": "node src/medirTopK.js",
-    "autocompletar": "node src/probarAutocompletar.js",
-    "laboratorio": "node src/laboratorio.js",
-    "catalogo": "node src/catalogo.js",
-    "start": "node src/catalogo.js"
+    "autocompletar": "node src/probarAutocompletar.js"
   },
   "keywords": [],
   "author": "",

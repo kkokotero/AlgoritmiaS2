@@ -3,6 +3,8 @@
  * Comparaciones de texto con localeCompare. Punto medio con Math.floor.
  */
 
+const { mergeSort } = require("./ordenamiento");
+
 /**
  * @typedef {Object} Libro
  * @property {string} isbn
@@ -13,14 +15,22 @@
  */
 
 /**
- * Ordena una copia del catálogo por ISBN usando localeCompare.
+ * Comparador por ISBN ascendente.
+ * @param {Libro} a
+ * @param {Libro} b
+ * @returns {number}
+ */
+function compararPorIsbn(a, b) {
+  return a.isbn.localeCompare(b.isbn);
+}
+
+/**
+ * Ordena una copia del catálogo por ISBN usando Merge Sort propio (sin sort nativo).
  * @param {Libro[]} libros - Catálogo original.
  * @returns {Libro[]} Copia ordenada por ISBN ascendente.
  */
 function ordenarPorIsbn(libros) {
-  const copia = libros.slice();
-  copia.sort((a, b) => a.isbn.localeCompare(b.isbn));
-  return copia;
+  return mergeSort(libros, compararPorIsbn).arreglo;
 }
 
 /**

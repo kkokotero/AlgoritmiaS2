@@ -82,7 +82,7 @@ function estaOrdenado(arr) {
 }
 const n = 10000;
 const aleatorio10k = generarCatalogo(n);
-const ordenado10k = generarCatalogo(n).sort((a, b) => a.anio - b.anio);
+const ordenado10k = mergeSort(generarCatalogo(n), (a, b) => a.anio - b.anio).arreglo;
 
 console.log("Caso A: 10.000 libros ALEATORIOS, Quick Sort pivote fijo (último elemento)");
 const tA0 = process.hrtime.bigint();

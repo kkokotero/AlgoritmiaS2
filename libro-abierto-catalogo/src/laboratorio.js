@@ -1,7 +1,8 @@
 /**
- * Laboratorio de rendimiento: comparación de algoritmos de ordenamiento.
- * Ejecuta Bubble, Selection, Insertion, Merge Sort y sort nativo con 500, 1000, 2000 y 4000 libros
- * en cuatro estados (aleatorio, ordenado, invertido, casi ordenado).
+ * Laboratorio de rendimiento v1.0 - Catálogo Libro Abierto.
+ * Compara cinco algoritmos (Bubble, Selection, Insertion, Merge, Quick aleatorio)
+ * con 1.000, 10.000 y 100.000 libros (los básicos solo hasta 10.000).
+ * Verifica automáticamente que cada resultado esté ordenado.
  * Ejecutar: node src/laboratorio.js
  */
 
@@ -11,7 +12,6 @@ const {
   selectionSort,
   insertionSort,
   mergeSort,
-  quickSort,
   quickSortAleatorio,
 } = require("./ordenamiento");
 
@@ -47,26 +47,11 @@ function estaOrdenado(arr) {
 }
 
 /**
- * Mide el tiempo de Array.prototype.sort como referencia.
- * @param {Libro[]} datos
- * @param {(a:Libro,b:Libro)=>number} comparar
- * @returns {{arreglo: Libro[], tiempoMs: number, ordenado: boolean}}
- */
-function medirSortNativo(datos, comparar) {
-  const copia = datos.slice();
-  const t0 = process.hrtime.bigint();
-  copia.sort(comparar);
-  const t1 = process.hrtime.bigint();
-  const tiempoMs = Number(t1 - t0) / 1e6;
-  return { arreglo: copia, tiempoMs, ordenado: estaOrdenado(copia) };
-}
-
-/**
  * Ejecuta un algoritmo y devuelve métricas.
  * @param {(arr:Libro[], cmp:(a:Libro,b:Libro)=>number)=>{arreglo:Libro[],comparaciones:number,intercambios:number,desplazamientos:number,pasadas:number}} algFn
  * @param {Libro[]} datos
  * @param {(a:Libro,b:Libro)=>number} comparar
- * @returns {{comparaciones:number, intercambios:number, desplazamientos:number, pasadas:number, tiempoMs:number, ordenado:boolean}}
+ * @returns {{comparaciones:number, intercambios:number, desplazamientos:number, tiempoMs:number, ordenado:boolean}}
  */
 function medirAlgoritmo(algFn, datos, comparar) {
   const copia = datos.slice();
@@ -78,14 +63,13 @@ function medirAlgoritmo(algFn, datos, comparar) {
     comparaciones: res.comparaciones,
     intercambios: res.intercambios,
     desplazamientos: res.desplazamientos,
-    pasadas: res.pasadas,
     tiempoMs,
     ordenado: estaOrdenado(res.arreglo),
   };
 }
 
 /**
- * Genera los datos para un estado dado.
+ * Genera los datos para un estado dado (sin sort nativo).
  * @param {number} n
  * @param {string} estado
  * @returns {Libro[]}
@@ -95,10 +79,10 @@ function generarEstado(n, estado) {
     return generarCatalogo(n);
   }
   if (estado === "Ordenado") {
-    return generarCatalogo(n).sort((a, b) => a.anio - b.anio);
+    return mergeSort(generarCatalogo(n), compararPorAnio).arreglo;
   }
   if (estado === "Invertido") {
-    return generarCatalogo(n).sort((a, b) => b.anio - a.anio);
+    return mergeSort(generarCatalogo(n), (a, b) => b.anio - a.anio).arreglo;
   }
   if (estado === "Casi ordenado") {
     return casiOrdenado(n, 20);
@@ -108,128 +92,76 @@ function generarEstado(n, estado) {
 
 /**
  * Ejecuta el laboratorio completo.
- * @returns {{filas: any[], resumenCrecimiento: any[]}}
+ * @returns {{filas: any[], todosOk: boolean}}
  */
 function ejecutarLaboratorio() {
-  const tamanos = [500, 1000, 2000, 4000];
-  const estados = ["Aleatorio", "Ordenado", "Invertido", "Casi ordenado"];
-  const algoritmos = [
+  const basicos = [
     { nombre: "Bubble Sort", fn: bubbleSort },
     { nombre: "Selection Sort", fn: selectionSort },
     { nombre: "Insertion Sort", fn: insertionSort },
+  ];
+  const avanzados = [
     { nombre: "Merge Sort", fn: mergeSort },
-    { nombre: "Quick Sort (pivote fijo)", fn: quickSort },
-    { nombre: "Quick Sort (pivote aleatorio)", fn: quickSortAleatorio },
+    { nombre: "Quick Sort (aleatorio)", fn: quickSortAleatorio },
+  ];
+
+  // Configuración: básicos hasta 10.000, avanzados hasta 100.000
+  /** @type {{n:number, estados:string[], algoritmos:{nombre:string, fn:any}[]}[]} */
+  const configuraciones = [
+    { n: 1000, estados: ["Aleatorio", "Ordenado", "Invertido", "Casi ordenado"], algoritmos: basicos.concat(avanzados) },
+    { n: 10000, estados: ["Aleatorio", "Ordenado", "Invertido", "Casi ordenado"], algoritmos: basicos.concat(avanzados) },
+    { n: 100000, estados: ["Aleatorio"], algoritmos: avanzados },
   ];
 
   /** @type {any[]} */
   const filas = [];
-  /** @type {Record<string, Record<string, Record<number, number>>>} */
-  const tiempos = {};
+  let todosOk = true;
 
-  for (const n of tamanos) {
-    for (const estado of estados) {
-      const datos = generarEstado(n, estado);
-
-      for (const alg of algoritmos) {
+  for (const cfg of configuraciones) {
+    for (const estado of cfg.estados) {
+      const datos = generarEstado(cfg.n, estado);
+      for (const alg of cfg.algoritmos) {
         const m = medirAlgoritmo(alg.fn, datos, compararPorAnio);
         const verificacion = m.ordenado ? "OK" : "FALLA";
+        if (!m.ordenado) todosOk = false;
         filas.push({
-          n,
+          n: cfg.n,
           estado,
           algoritmo: alg.nombre,
           comparaciones: m.comparaciones,
           intercambios: m.intercambios,
-          desplazamientos: m.desplazamientos,
           "tiempo (ms)": Number(m.tiempoMs.toFixed(3)),
           verificacion,
         });
-        if (!tiempos[alg.nombre]) tiempos[alg.nombre] = {};
-        if (!tiempos[alg.nombre][estado]) tiempos[alg.nombre][estado] = {};
-        tiempos[alg.nombre][estado][n] = m.tiempoMs;
-      }
-
-      // sort nativo como referencia de tiempo
-      const s = medirSortNativo(datos, compararPorAnio);
-      const verificacionSort = s.ordenado ? "OK" : "FALLA";
-      filas.push({
-        n,
-        estado,
-        algoritmo: "sort (nativo)",
-        comparaciones: "-",
-        intercambios: "-",
-        desplazamientos: "-",
-        "tiempo (ms)": Number(s.tiempoMs.toFixed(3)),
-        verificacion: verificacionSort,
-      });
-      if (!tiempos["sort (nativo)"]) tiempos["sort (nativo)"] = {};
-      if (!tiempos["sort (nativo)"][estado]) tiempos["sort (nativo)"][estado] = {};
-      tiempos["sort (nativo)"][estado][n] = s.tiempoMs;
-    }
-  }
-
-  // Resumen de crecimiento al duplicar n
-  /** @type {any[]} */
-  const resumenCrecimiento = [];
-  const pares = [
-    [500, 1000],
-    [1000, 2000],
-    [2000, 4000],
-  ];
-  const nombres = [
-    "Bubble Sort",
-    "Selection Sort",
-    "Insertion Sort",
-    "Merge Sort",
-    "Quick Sort (pivote fijo)",
-    "Quick Sort (pivote aleatorio)",
-    "sort (nativo)",
-  ];
-  for (const estado of estados) {
-    for (const nombre of nombres) {
-      for (const [n1, n2] of pares) {
-        const t1 = tiempos[nombre] && tiempos[nombre][estado] ? tiempos[nombre][estado][n1] : undefined;
-        const t2 = tiempos[nombre] && tiempos[nombre][estado] ? tiempos[nombre][estado][n2] : undefined;
-        if (t1 !== undefined && t2 !== undefined) {
-          const razon = t1 > 0 ? t2 / t1 : null;
-          resumenCrecimiento.push({
-            algoritmo: nombre,
-            estado,
-            de: n1,
-            a: n2,
-            "t1 (ms)": Number(t1.toFixed(3)),
-            "t2 (ms)": Number(t2.toFixed(3)),
-            "razón (t2/t1)": razon !== null ? Number(razon.toFixed(2)) : "-",
-          });
-        }
       }
     }
   }
 
-  return { filas, resumenCrecimiento };
+  return { filas, todosOk };
 }
 
 function main() {
-  console.log("=== Laboratorio de rendimiento - Catálogo Libro Abierto v0.3 ===");
-  console.log("Algoritmos: Bubble, Selection, Insertion, Merge Sort, Quick Sort (pivote fijo/aleatorio) y sort nativo (referencia)");
-  console.log("Tamaños: 500, 1000, 2000, 4000 libros | Estados: Aleatorio, Ordenado, Invertido, Casi ordenado\n");
+  console.log("=== Laboratorio de rendimiento - Catálogo Libro Abierto v1.0 ===");
+  console.log("Cinco algoritmos: Bubble Sort, Selection Sort, Insertion Sort, Merge Sort, Quick Sort (aleatorio)");
+  console.log("Tamaños: 1.000, 10.000 y 100.000 libros (algoritmos básicos solo hasta 10.000)");
+  console.log("Estados: Aleatorio, Ordenado, Invertido, Casi ordenado (100.000 en Aleatorio para avanzados)\n");
 
-  const { filas, resumenCrecimiento } = ejecutarLaboratorio();
+  const { filas, todosOk } = ejecutarLaboratorio();
 
-  console.log("--- Tabla de resultados (comparaciones, intercambios y tiempo) ---");
+  console.log("--- Tabla de resultados ---");
   console.table(filas);
 
-  const fallas = filas.filter((f) => f.verificacion === "FALLA");
-  if (fallas.length === 0) {
-    console.log("Verificación automática: sin resultados FALLA (todos los algoritmos ordenan correctamente).\n");
+  console.log("--- Resumen 100.000 libros (Merge Sort y Quick Sort) ---");
+  const filas100k = filas.filter((f) => f.n === 100000);
+  console.table(filas100k);
+  const ambosRapidos = filas100k.every((f) => f["tiempo (ms)"] < 1000 && f.verificacion === "OK");
+  console.log(`¿Merge Sort y Quick Sort terminan en < 1000 ms con 100.000 libros? ${ambosRapidos ? "Sí" : "No"}`);
+
+  if (todosOk) {
+    console.log("\nVerificación automática: sin resultados FALLA (todos los algoritmos ordenan correctamente).");
   } else {
-    console.log(`Verificación automática: ${fallas.length} resultado(s) con FALLA.\n`);
+    console.log("\nVerificación automática: se detectaron resultados FALLA.");
   }
-
-  console.log("--- Crecimiento del tiempo al duplicar n (t2/t1) ---");
-  console.table(resumenCrecimiento);
-
-  console.log("Nota: para algoritmos O(n²) se espera que al duplicar n el tiempo crezca ~4 veces (salvo casos favorables como datos ordenados/casi ordenados).");
 }
 
 if (require.main === module) {

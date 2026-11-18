@@ -2,6 +2,8 @@
  * Generador de catálogos de libros para pruebas del motor Libro Abierto.
  */
 
+const { mergeSort } = require("./ordenamiento");
+
 const PALABRAS_TITULO_1 = [
   "Cien", "La", "El", "Los", "Las", "Memorias", "Sombras", "Historias",
   "Caminos", "Voces", "Noches", "Crónica", "Relatos", "Secretos", "Tiempo",
@@ -111,22 +113,23 @@ function generarCatalogo(n, opciones) {
 
 /**
  * Devuelve un catálogo ordenado por año con unos pocos libros fuera de lugar al final.
+ * Usa Merge Sort propio (sin sort nativo).
  * @param {number} n - Cantidad de libros.
  * @param {number} cambios - Cantidad de libros a dejar fuera de lugar al final.
  * @returns {{isbn: string, titulo: string, autor: string, anio: number, prestamos: number}[]} Catálogo casi ordenado.
  */
 function casiOrdenado(n, cambios) {
   const catalogo = generarCatalogo(n);
-  catalogo.sort((a, b) => a.anio - b.anio);
+  const ordenado = mergeSort(catalogo, (a, b) => a.anio - b.anio).arreglo;
   const k = Math.min(Math.max(0, cambios), Math.floor(n / 2));
   for (let i = 0; i < k; i++) {
     const idxFinal = n - 1 - i;
-    const idxOtro = Math.floor(Math.random() * (n - k));
-    const temp = catalogo[idxFinal];
-    catalogo[idxFinal] = catalogo[idxOtro];
-    catalogo[idxOtro] = temp;
+    const idxOtro = Math.floor(Math.random() * Math.max(1, n - k));
+    const temp = ordenado[idxFinal];
+    ordenado[idxFinal] = ordenado[idxOtro];
+    ordenado[idxOtro] = temp;
   }
-  return catalogo;
+  return ordenado;
 }
 
 module.exports = { generarCatalogo, casiOrdenado };
