@@ -367,3 +367,75 @@ Resumen: Plan original CON CICLO (T3 → T4 → T5 → T3).
 ## Integración en el planificador
 - Comando: `node src/planificador.js --mantenimiento` (o `npm run mantenimiento` si se define script).
 - Muestra diagnóstico del plan original (ciclo y tareas), propuesta de corrección justificada, diagnóstico del plan corregido y orden de ejecución válido. Implementación en `src/mantenimiento.js` usando `GrafoDirigido`.
+
+---
+
+# Ruta Paisa v1.0 — Integración, pruebas y cierre (MiniReto 12)
+
+## Integración y organización del repositorio
+Se reorganizó el proyecto en la estructura solicitada:
+- `src/estructuras/`: `NodoArbol.js`, `ArbolBusqueda.js`, `Grafo.js` (no dirigido, DFS/BFS/componentes), `GrafoDirigido.js` (ciclos y orden topológico), `Cola.js`.
+- `src/dominio/`: `indice.js` (ABB/listado/rango), `red.js` (grafo de líneas A,B,K,T), `cierres.js` (alcanzabilidad y estaciones críticas), `mantenimiento.js` (validación de plan), `planificador.js` (lógica v1.0).
+- `src/retos/`: `duplicados.js` (Set, claves compuestas) y `demanda.js` (ventana deslizante, Map de frecuencias).
+- `src/planificador.js`: CLI principal con compatibilidad de módulos anteriores (reexportaciones en `src/`).
+- `pruebas/todo.js`: pruebas con casos normal y borde por funcionalidad, salida `OK`/`FALLA`.
+
+### Funcionalidades ofrecidas por `node src/planificador.js`
+1. **Consulta de ruta con transbordos y cierres:** `<origen> <destino> [--cerradas cod1,cod2,...]` (valida códigos con índice ABB, BFS con menor número de tramos, nombres/líneas/paradas/transbordos, mensajes claros para inexistentes o viaje imposible).
+2. **Listado ordenado de estaciones:** `--listado` (inorden del ABB, 10–90).
+3. **Consulta por rango de códigos:** `--rango <desde> <hasta>` (poda en ABB, resultado en orden).
+4. **Análisis de estaciones críticas:** `--criticas` (cierre individual que divide la red en 2+ componentes, DFS/componentes).
+5. **Validación del plan de mantenimiento:** `--mantenimiento` (grafo dirigido, detección de ciclo con DFS de 3 estados y orden topológico del plan corregido).
+
+**Verificación:** `node src/planificador.js 10 59` (ruta con 2 transbordos), `--listado` (20 estaciones), `--rango 10 30` (6 estaciones), `--criticas` (11 críticas), `--mantenimiento` (ciclo `T3 → T4 → T5 → T3` y orden `T1 → T2 → T5 → T3 → T4 → T6`). `node pruebas/todo.js` → **14 OK, 0 FALLA** (normal y borde por cada funcionalidad y retos).
+
+## Tabla de decisiones técnicas (resumen)
+Documentada en `README.md` (≥6 problemas) con problema, estructura/algoritmo, alternativa descartada, complejidad y justificación: árbol general (jerarquía), ABB (índice/listado/rango), grafo no dirigido + lista de adyacencia (red/transbordos), DFS (alcanzabilidad/cierres/componentes), BFS+cola+padres (ruta mínima en tramos), grafo dirigido + DFS 3 estados/topológico (ciclos y orden de mantenimiento), Set con clave compuesta (duplicados O(n)), ventana deslizante y Map+ordenamiento (demanda, con alternativa top-k O(n+u)).
+
+## Sustentación técnica (5 minutos) — guion preparado
+
+**1. Problema del cliente (≈45 s):** Ruta Paisa necesita un planificador que permita a pasajeros y operación consultar viajes en la red piloto (líneas A,B,K,T, 20 estaciones), considerando transbordos y cierres, disponer de un índice consultable de estaciones, identificar puntos críticos de la red y validar planes de mantenimiento con dependencias sin bloqueos.
+
+**2. Demostración en vivo de dos consultas (≈90 s):**
+- `node src/planificador.js 10 59` → valida origen/destino con el índice ABB, calcula ruta con BFS, muestra estaciones por nombre, líneas por tramo, **7 paradas** y **2 transbordos** (Hospital A→T, Estadio T→B).
+- `node src/planificador.js --mantenimiento` → modela dependencias como grafo dirigido, detecta el ciclo **T3 → T4 → T5 → T3** en el plan original, propone corrección justificada (T5 depende de T2 en vez de T4) y entrega orden topológico válido **T1 → T2 → T5 → T3 → T4 → T6**.
+
+**3. Decisión técnica justificada con complejidad (≈75 s):** para “la ruta con menos paradas” se eligió **BFS** sobre un grafo no dirigido con lista de adyacencia, usando **cola** FIFO y `Map` de padres para reconstruir el camino. En grafos no ponderados, BFS explora por niveles y garantiza el **mínimo número de aristas (tramos)**. **Complejidad O(V+E)** tiempo y **O(V)** espacio. Alternativas descartadas: **DFS** (encuentra un camino, no necesariamente el más corto) y **Dijkstra** (sobrecosto innecesario al no haber pesos; sería pertinente si se optimizara por tiempo/distancia).
+
+**4. Mejora futura (≈45 s):** incorporar **pesos** en las aristas (tiempo estimado, congestión, frecuencia) y usar **Dijkstra/A*** para rutas óptimas por tiempo; persistir el grafo/índice y telemetría de cierres en tiempo real; y balancear el índice (AVL/árbol rojo-negro) o usar un mapa ordenado para garantizar O(log n) aun con inserciones ordenadas.
+
+**5. Cierre (≈15 s):** el producto integra árbol general, ABB, grafos, DFS/BFS, hashing y técnicas de entrevista (ventana deslizante/frecuencias) con pruebas y decisiones justificadas.
+
+### Evaluación de la sustentación (rúbrica de la sesión)
+| Criterio | Nivel | Observación |
+|---|---|---|
+| Claridad del problema y contexto | Cumple | Expone necesidad del cliente y alcance (rutas, cierres, índice, críticos, mantenimiento). |
+| Demostración funcional | Cumple | Muestra dos consultas en vivo coherentes con las funcionalidades del planificador. |
+| Decisión técnica y complejidad | Cumple | Justifica BFS frente a alternativas y declara O(V+E)/O(V) correctamente. |
+| Mejora futura y visión | Cumple | Propone evolución realista (pesos/tiempos, balanceo, datos en tiempo real). |
+| Comunicación y manejo del tiempo | Cumple | Estructura en 5 bloques dentro de ~5 minutos, lenguaje técnico preciso. |
+
+**Fortaleza:** conexión clara entre la pregunta del usuario (“menos paradas”) y la elección algorítmica con complejidad.  
+**Oportunidad de mejora:** incluir en la demo un caso borde en vivo (código inexistente o `--cerradas 56`) para evidenciar robustez.
+
+## Resumen de lo construido en cada MiniReto de la semana (12)
+
+| MiniReto | Qué se construyó | Aporte al producto | Evidencia (commit principal) |
+|---:|---|---|---|
+| 1. Estación base | Árbol general de la red (`NodoArbol`, `redArbol.js`) y recorridos recursivos (imprimir, contar nodos/hojas, altura) | Jerarquía red→líneas→estaciones→servicios; detecta límite para estaciones compartidas | `dcc9a23` feat(ruta-paisa): modelar red como árbol general con recorridos recursivos |
+| 2. Índice de estaciones | ABB por código (`ArbolBusqueda.js`, `insertar`, `buscar` con comparaciones) | Búsqueda eficiente y validación de estaciones | `1e50024` feat(ruta-paisa): agregar ABB de estaciones con inserción y búsqueda |
+| 3. Recorridos del índice | Inorden, preorden, postorden, altura y hojas; exportación/reconstrucción | Listados ordenados, exportación y métricas del índice | `23623d4` feat(ruta-paisa): recorridos inorden/preorden/postorden, altura y hojas del ABB |
+| 4. Ruta Paisa v0.1 | Consultas mínimo/máximo/rango con poda, reporte de índice y análisis de árbol degenerado O(n) | Índice consultable integrado | `22cc16c` chore(release): ruta-paisa-planificador v0.1 - consultas mínimo/máximo/rango y reporte |
+| 5. La red como grafo | Grafo no dirigido con lista de adyacencia y aristas etiquetadas por línea (`Grafo.js`, `red.js`) | Modelo correcto de transbordos y ciclos (V=20, E=21) | `d22c60b` feat(ruta-paisa): grafo no dirigido de la red con lista de adyacencia y transbordos |
+| 6. DFS y cierres | DFS recursivo/iterativo, componentes conectados y estaciones críticas (`cierres.js`) | Alcanzabilidad y análisis de impacto de cierres | `f5d52b6` feat(ruta-paisa): DFS recursivo/iterativo, componentes y estaciones críticas |
+| 7. Menos paradas | BFS con cola y reconstrucción de camino (ruta mínima en tramos) | Cálculo de rutas en grafo no ponderado | `584d6eb` chore(release): ruta-paisa-planificador v0.2 - planificador BFS con transbordos y cierres |
+| 8. Ruta Paisa v0.2 | Integración índice+grafo, CLI con transbordos, nombres/líneas, cierres y manejo de imposibles | Planificador de viajes funcional | `584d6eb` chore(release): ruta-paisa-planificador v0.2 - planificador BFS con transbordos y cierres |
+| 9. Simulacro I | Detección de duplicados con `Set` y clave compuesta, protocolo y rúbrica (`retos/duplicados.js`) | Solución O(n) y comunicación en entrevista | `9b15332` feat(ruta-paisa): reto duplicados con Set y evaluaciones Día 3 |
+| 10. Simulacro II | Ventana deslizante (hora pico) y frecuencias con `Map` (`retos/demanda.js`), alternativas de complejidad | Análisis de demanda y decisiones técnicas | `9e93d25` feat(ruta-paisa): reto demanda ventana deslizante y frecuencias Día 3 |
+| 11. Mantenimiento sin ciclos | Grafo dirigido, DFS de 3 estados para ciclos y orden topológico (`GrafoDirigido.js`, `mantenimiento.js`, `--mantenimiento`) | Validación de planes de obra y diagnóstico accionable | `b264aa4` feat(ruta-paisa): grafo dirigido, detección de ciclos y mantenimiento |
+| 12. Ruta Paisa v1.0 | Integración en `estructuras/`, `dominio/`, `retos/`, 5 funcionalidades en CLI, pruebas `OK/FALLA`, README con decisiones, bitácora y sustentación | Producto final documentado y probado | `chore(release): ruta-paisa-planificador v1.0 - integración, pruebas y documentación` (commit de lanzamiento) |
+
+> Nota: los MiniRetos 7 y 8 se consolidan en el release v0.2 (BFS y planificador integrado), según la traza de commits del repositorio.
+
+## Reflexión de cierre
+La estrategia que más me resultó útil en la ruta fue **elegir la estructura y el algoritmo a partir de las “señales” del problema** y validar la decisión con su complejidad y una traza pequeña: jerarquía → árbol, relaciones con ciclos/transbordos → grafo, “menos paradas” en grafo no ponderado → BFS, dependencias → grafo dirigido/topológico, unicidad/duplicados → `Set` hash, consecutivos → ventana deslizante y “más usados” → frecuencias con `Map`. Complementar esto con el protocolo en voz alta (aclarar restricciones, considerar fuerza bruta, optimizar y justificar) permitió pasar de soluciones correctas a soluciones eficientes y explicables, que es el objetivo central de la sustentación y del trabajo como desarrollador.

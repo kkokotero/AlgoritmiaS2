@@ -32,3 +32,11 @@ Las bitácoras detalladas se registran en `docs/` organizada por semana y día:
 - **Plan original:** ciclo detectado **T3 → T4 → T5 → T3** (nadie puede iniciar). **Corrección:** T5 pasa a requerir T2 en lugar de T4 (sensores tras cambiar rieles y antes de software), rompiendo el ciclo.
 - **Plan corregido:** sin ciclos, orden válido **T1 → T2 → T5 → T3 → T4 → T6** (cada tarea después de sus requisitos).
 - **Integración:** `node src/planificador.js --mantenimiento` (`src/mantenimiento.js`) muestra diagnóstico, ciclo, corrección justificada y orden. Dibujo del grafo dirigido y análisis en [../docs/semana-4/bitacora-dia-3.md](../docs/semana-4/bitacora-dia-3.md).
+
+## Día 3 — Ruta Paisa v1.0 (integración, pruebas y cierre)
+- **Organización:** `src/estructuras/` (NodoArbol, ArbolBusqueda, Grafo, GrafoDirigido, Cola), `src/dominio/` (indice, red, cierres, mantenimiento, planificador), `src/retos/` (duplicados, demanda).
+- **CLI `src/planificador.js` (5 funcionalidades):** ruta con transbordos y cierres (`<origen> <destino> [--cerradas]`), `--listado` ordenado, `--rango <desde> <hasta>`, `--criticas`, `--mantenimiento`.
+- **Pruebas:** `pruebas/todo.js` con casos normal y borde por funcionalidad → **14 OK, 0 FALLA** (`npm test`).
+- **Documentación:** `README.md` con producto, ejecución y tabla de decisiones técnicas (≥6) con alternativa y complejidad.
+- **Sustentación (5 min):** problema del cliente, demo en vivo (`10 59`, `--mantenimiento`), decisión justificada (BFS, O(V+E)) y mejora futura; evaluación de rúbrica registrada.
+- **Cierre:** resumen de los 12 MiniRetos y reflexión en [../docs/semana-4/bitacora-dia-3.md](../docs/semana-4/bitacora-dia-3.md). Lanzamiento **v1.0.0**.
