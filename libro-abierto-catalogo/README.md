@@ -1,7 +1,7 @@
-# Catálogo Libro Abierto v0.2 (Semana 3)
+# Catálogo Libro Abierto v0.3 (Semana 3)
 
 ## Qué es
-Motor de búsqueda y ordenamiento para el catálogo de la red de bibliotecas **Libro Abierto**. Incluye búsqueda lineal/binaria sobre catálogos grandes, algoritmos de ordenamiento cuadráticos con comparadores y un laboratorio de rendimiento para decidir qué algoritmo usar en cada proceso.
+Motor de búsqueda y ordenamiento para el catálogo de la red de bibliotecas **Libro Abierto**. Incluye búsqueda lineal/binaria sobre catálogos grandes, algoritmos de ordenamiento (cuadráticos y Merge Sort O(n log n)) con comparadores, y un laboratorio de rendimiento para decidir qué algoritmo usar en cada proceso.
 
 ## Requisitos
 - [Node.js](https://nodejs.org/) >= 18
@@ -19,11 +19,12 @@ Motor de búsqueda y ordenamiento para el catálogo de la red de bibliotecas **L
 | ISBN (cualquier copia) | Búsqueda binaria iterativa/recursiva (catálogo ordenado por ISBN) |
 | ISBN (primera ocurrencia entre copias) | Búsqueda binaria lower bound + conteo a la derecha (`primeraPosicionIsbn`) |
 
-## Ordenamiento (v0.2)
-Algoritmos implementados en `src/ordenamiento.js` (misma firma `(arreglo, comparar, { traza })` y contadores de comparaciones, intercambios, desplazamientos y pasadas; no mutan el original):
-- **Bubble Sort**: intercambio de adyacentes, optimizado con corte temprano.
-- **Selection Sort**: búsqueda del mínimo e intercambio (comparaciones constantes n·(n-1)/2, mínimo de intercambios, **inestable**).
-- **Insertion Sort**: inserción por desplazamiento (**estable**, aprovecha datos ordenados/casi ordenados).
+## Ordenamiento
+Algoritmos en `src/ordenamiento.js` (misma firma `(arreglo, comparar, { traza })` y contadores de comparaciones, intercambios, desplazamientos y pasadas; no mutan el original):
+- **Bubble Sort** (v0.2): intercambio de adyacentes, optimizado con corte temprano.
+- **Selection Sort** (v0.2): búsqueda del mínimo e intercambio (comparaciones constantes n·(n-1)/2, mínimo de intercambios, **inestable**).
+- **Insertion Sort** (v0.2): inserción por desplazamiento (**estable**, aprovecha datos ordenados/casi ordenados).
+- **Merge Sort** (v0.3): recursivo y **estable** (`mezclar` con dos índices, sin `sort`, `slice` para dividir). Complejidad garantizada **O(n log n)** y memoria adicional **O(n)**.
 
 Comparadores en `src/comparadores.js` (también reexportados desde `ordenamiento.js`):
 - `porAutorYTitulo` (autor y luego título, `localeCompare("es",{sensitivity:"base"})`, ignora mayúsculas/tildes)
@@ -33,16 +34,19 @@ Comparadores en `src/comparadores.js` (también reexportados desde `ordenamiento
 Generación de datos: `generarCatalogo(n, { copiasRepetidas })` y `casiOrdenado(n, cambios)` en `src/generador.js`.
 
 ## Laboratorio de rendimiento
-`src/laboratorio.js` ejecuta Bubble, Selection, Insertion y `sort` nativo (referencia de tiempo) con **500, 1.000, 2.000 y 4.000** libros en estados **aleatorio, ordenado, invertido y casi ordenado**, mostrando con `console.table` comparaciones, intercambios y tiempo. Verifica automáticamente que cada resultado esté ordenado (marca **FALLA** si no) e incluye resumen del crecimiento del tiempo al duplicar `n`.
+`src/laboratorio.js` ejecuta Bubble, Selection, Insertion, Merge Sort y `sort` nativo (referencia) con **500, 1.000, 2.000 y 4.000** libros en estados **aleatorio, ordenado, invertido y casi ordenado**, mostrando con `console.table` comparaciones, intercambios y tiempo. Verifica automáticamente que cada resultado esté ordenado (marca **FALLA** si no) e incluye resumen del crecimiento del tiempo al duplicar `n`.
 
 ## Cómo ejecutarlo
 Desde la carpeta `libro-abierto-catalogo/`:
 
 ```bash
-# v0.2: laboratorio de ordenamiento (tabla completa + verificación + crecimiento)
+# v0.3: laboratorio de ordenamiento (incluye Merge Sort, tabla + verificación + crecimiento)
 node src/laboratorio.js
 # o
 npm run laboratorio
+
+# Merge Sort: mezclar, árbol de divisiones/mezclas, comparaciones vs n·log2(n), estabilidad y tiempos
+npm run merge
 
 # Trazas y mediciones de ordenamiento (Bubble/Selection/Insertion)
 npm run ordenamiento
@@ -59,7 +63,7 @@ npm run busqueda
 npm run binaria
 ```
 
-**Salida esperada (`laboratorio.js`):** tabla de resultados por (n, estado, algoritmo) con comparaciones, intercambios, tiempo y verificación (OK/FALLA) sin errores, tabla de crecimiento al duplicar `n` y mensaje de verificación automática.
+**Salida esperada (`laboratorio.js`):** tabla de resultados por (n, estado, algoritmo) con comparaciones, intercambios, tiempo y verificación (OK/FALLA) sin errores, tabla de crecimiento al duplicar `n` y mensaje de verificación automática. **Salida esperada (`merge`):** prueba de `mezclar`, árbol de ejecución de Merge Sort, tabla comparaciones vs `n·log2(n)`, experimento de estabilidad y comparación de tiempos con 4.000 libros.
 
 ## Estructura
 ```
@@ -73,11 +77,12 @@ libro-abierto-catalogo/
 │   ├── busquedaBinaria.js     # Búsqueda binaria y primera ocurrencia
 │   ├── comparacionBinaria.js  # Comparación lineal vs binaria
 │   ├── catalogo.js            # Buscador integrado v0.1
-│   ├── ordenamiento.js        # Bubble, Selection, Insertion (+ comparadores)
+│   ├── ordenamiento.js        # Bubble, Selection, Insertion, Merge (+ comparadores)
 │   ├── comparadores.js        # Comparadores compuestos e invertir
-│   ├── medirOrdenamiento.js   # Trazas y tabla comparativa
+│   ├── medirOrdenamiento.js   # Trazas y tabla comparativa (cuadráticos)
 │   ├── medirEstabilidad.js    # Experimento de estabilidad
-│   └── laboratorio.js         # Laboratorio de rendimiento v0.2
+│   ├── medirMergeSort.js      # Trazas, árbol y mediciones de Merge Sort
+│   └── laboratorio.js         # Laboratorio de rendimiento
 ├── bitacora.md
 ├── jsconfig.json
 ├── package.json
@@ -86,4 +91,5 @@ libro-abierto-catalogo/
 
 ## Bitácoras
 - [Día 1: modelo, búsquedas, trazas, comparaciones y tabla de decisión](../docs/semana-3/bitacora-dia-1.md)
-- [Día 2: ordenamiento, trazas, estabilidad y recomendaciones](../docs/semana-3/bitacora-dia-2.md)
+- [Día 2: ordenamiento cuadrático, estabilidad y recomendaciones](../docs/semana-3/bitacora-dia-2.md)
+- [Día 3: Merge Sort, árbol, O(n log n) y estabilidad](../docs/semana-3/bitacora-dia-3.md)

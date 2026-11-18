@@ -1,12 +1,12 @@
 /**
  * Laboratorio de rendimiento: comparación de algoritmos de ordenamiento.
- * Ejecuta Bubble, Selection, Insertion y sort nativo con 500, 1000, 2000 y 4000 libros
+ * Ejecuta Bubble, Selection, Insertion, Merge Sort y sort nativo con 500, 1000, 2000 y 4000 libros
  * en cuatro estados (aleatorio, ordenado, invertido, casi ordenado).
  * Ejecutar: node src/laboratorio.js
  */
 
 const { generarCatalogo, casiOrdenado } = require("./generador");
-const { bubbleSort, selectionSort, insertionSort } = require("./ordenamiento");
+const { bubbleSort, selectionSort, insertionSort, mergeSort } = require("./ordenamiento");
 
 /**
  * @typedef {Object} Libro
@@ -110,6 +110,7 @@ function ejecutarLaboratorio() {
     { nombre: "Bubble Sort", fn: bubbleSort },
     { nombre: "Selection Sort", fn: selectionSort },
     { nombre: "Insertion Sort", fn: insertionSort },
+    { nombre: "Merge Sort", fn: mergeSort },
   ];
 
   /** @type {any[]} */
@@ -166,7 +167,7 @@ function ejecutarLaboratorio() {
     [1000, 2000],
     [2000, 4000],
   ];
-  const nombres = ["Bubble Sort", "Selection Sort", "Insertion Sort", "sort (nativo)"];
+  const nombres = ["Bubble Sort", "Selection Sort", "Insertion Sort", "Merge Sort", "sort (nativo)"];
   for (const estado of estados) {
     for (const nombre of nombres) {
       for (const [n1, n2] of pares) {
@@ -192,8 +193,8 @@ function ejecutarLaboratorio() {
 }
 
 function main() {
-  console.log("=== Laboratorio de rendimiento - Catálogo Libro Abierto v0.2 ===");
-  console.log("Algoritmos: Bubble Sort, Selection Sort, Insertion Sort y sort nativo (referencia)");
+  console.log("=== Laboratorio de rendimiento - Catálogo Libro Abierto v0.3 ===");
+  console.log("Algoritmos: Bubble Sort, Selection Sort, Insertion Sort, Merge Sort y sort nativo (referencia)");
   console.log("Tamaños: 500, 1000, 2000, 4000 libros | Estados: Aleatorio, Ordenado, Invertido, Casi ordenado\n");
 
   const { filas, resumenCrecimiento } = ejecutarLaboratorio();
