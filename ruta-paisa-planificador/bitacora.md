@@ -4,6 +4,7 @@ Las bitácoras detalladas se registran en `docs/` organizada por semana y día:
 
 - [../docs/semana-4/bitacora-dia-1.md](../docs/semana-4/bitacora-dia-1.md)
 - [../docs/semana-4/bitacora-dia-2.md](../docs/semana-4/bitacora-dia-2.md)
+- [../docs/semana-4/bitacora-dia-3.md](../docs/semana-4/bitacora-dia-3.md)
 
 ## Día 1 — Árbol general de la red
 - **NodoArbol** (`src/NodoArbol.js`) y red piloto raíz→líneas→estaciones→servicios (`src/redArbol.js`), 22 apariciones de estaciones y 3 servicios.
@@ -20,3 +21,9 @@ Las bitácoras detalladas se registran en `docs/` organizada por semana y día:
 - **`cierres.js`:** alcanzabilidad 20/20, recursivo=iterativo; cierre de Estadio → aisladas **Floresta y San Javier**; 11 estaciones críticas justificadas.
 - **`planificador.js` (v0.2):** CLI `node src/planificador.js <origen> <destino> [--cerradas ...]`; valida con índice ABB, calcula ruta BFS con nombres/líneas/paradas y detecta transbordos; maneja códigos inexistentes y viajes imposibles por cierres.
 - **Bitácora Día 2:** dibujo del grafo, comparación lista/matriz, traza DFS (Santo Domingo, pila 6 pasos) y **traza BFS** (10→59), complejidad O(V+E) y **tabla de estructuras** (árbol general, ABB, grafo, cola, pila, Set, Map) con uso y complejidad.
+
+## Día 3 — Simulacro de entrevista: duplicados en torniquetes
+- **Reto:** detectar validaciones duplicadas (misma tarjeta, misma estación, mismo minuto) para no cobrar doble. Datos de ejemplo: 2 duplicados (T-101/50/07:02, T-330/56/07:05), monto a corregir **$6.000**; T-205 en 30 a las 07:02 y 07:09 **no** es duplicado.
+- **Solución (`src/retos/duplicados.js`):** fuerza bruta O(n²) vs optimización con `Set` de claves compuestas `tarjeta|estacion|hora` (primera vista válida, siguientes duplicadas). `validacionesDuplicadas` y `montoACorregir`. **Complejidad:** O(n) tiempo, O(n) espacio.
+- **Protocolo:** problema parafraseado, restricciones/casos borde, traza en voz alta con el ejemplo y cierre de complejidad (documentado en bitácora Día 3).
+- **Rúbrica:** evaluación recibida como candidato y autoevaluación (comprensión, diseño, corrección, complejidad, comunicación) con fortaleza y oportunidad de mejora registradas en `docs/semana-4/bitacora-dia-3.md`.
