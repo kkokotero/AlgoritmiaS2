@@ -5,7 +5,8 @@
   "main": "src/explorar.js",
   "scripts": {
     "explorar": "node src/explorar.js",
-    "busqueda": "node src/medirBusqueda.js"
+    "busqueda": "node src/medirBusqueda.js",
+    "binaria": "node src/comparacionBinaria.js"
   },
   "keywords": [],
   "author": "",

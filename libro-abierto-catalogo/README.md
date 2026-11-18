@@ -10,10 +10,14 @@ Proyecto de la red de bibliotecas comunitarias **Libro Abierto** (Valle de Aburr
 ```
 libro-abierto-catalogo/
 ├── src/
-│   ├── muestra.js     # Muestra de referencia (8 libros)
-│   ├── generador.js   # Generador de catálogos (ISBN únicos)
-│   └── explorar.js    # Exploración y verificación del catálogo generado
-├── bitacora.md        # Índice/enlace a bitácoras en docs/
+│   ├── muestra.js           # Muestra de referencia (8 libros)
+│   ├── generador.js         # Generador de catálogos (ISBN únicos)
+│   ├── explorar.js          # Exploración y verificación del catálogo generado
+│   ├── busqueda.js          # Búsqueda lineal (título, autor, palabra)
+│   ├── medirBusqueda.js     # Mediciones y traza de búsqueda lineal
+│   ├── busquedaBinaria.js   # Búsqueda binaria iterativa y recursiva por ISBN
+│   └── comparacionBinaria.js# Trazas y comparación lineal vs binaria
+├── bitacora.md              # Índice/enlace a bitácoras en docs/
 ├── jsconfig.json
 ├── package.json
 └── README.md
@@ -24,9 +28,13 @@ Desde la carpeta `libro-abierto-catalogo/`:
 
 ```bash
 # Exploración: genera 10.000 libros, verifica unicidad y muestra estadísticas
-node src/explorar.js
-# o
 npm run explorar
+
+# Búsqueda lineal: tabla de comparaciones y traza
+npm run busqueda
+
+# Búsqueda binaria: trazas, comparación lineal vs binaria y demostración
+npm run binaria
 ```
 
 **Salida esperada:** total 10.000 libros con ISBN únicos, primeros 5 libros, año más antiguo, año más reciente y total de préstamos.

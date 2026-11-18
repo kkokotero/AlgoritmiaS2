@@ -87,3 +87,85 @@ Medición con `node src/medirBusqueda.js` (títulos únicos por posición para m
 - **Caso promedio O(n):** el elemento está en una posición intermedia → aproximadamente `n/2` comparaciones (en la medición, índice medio = `n/2 + 1` comparaciones).
 
 Esto evidencia el crecimiento lineal del trabajo de la búsqueda lineal respecto al tamaño del catálogo.
+
+---
+
+### Día 1 (continuación): Búsqueda binaria por ISBN
+
+#### Implementación (`src/busquedaBinaria.js`)
+- Se ordena una **copia** del catálogo por ISBN con `sort` y comparación de textos `localeCompare` (`ordenarPorIsbn`), sin mutar el original.
+- `buscarPorIsbn(librosOrdenados, isbn)`: búsqueda binaria **iterativa** (`while (inicio <= fin)`), punto medio con `Math.floor((inicio+fin)/2)`, comparación con `localeCompare`. Devuelve `{ libro, comparaciones }`.
+- `buscarPorIsbnRecursivo(librosOrdenados, isbn, inicio, fin)`: versión **recursiva** con la misma lógica; devuelve `{ libro, comparaciones }` acumuladas.
+- `buscarPorIsbnConTraza(...)`: versión iterativa que registra `inicio, fin, medio, ISBN en medio y decisión` por paso.
+
+**Verificación:** ambas versiones devuelven el mismo resultado y número de comparaciones para todos los ISBN existentes y para un ISBN inexistente en un catálogo de prueba ordenado (1.000 libros): `Existentes e inexistente coinciden: Sí`.
+
+#### Trazas en la muestra ordenada por ISBN (8 libros)
+Muestra ordenada por ISBN:
+| Índice | ISBN | Título |
+|---:|---|---|
+| 0 | 9789584264879 | Rosario Tijeras |
+| 1 | 9789584270344 | El olvido que seremos |
+| 2 | 9789584276049 | La casa de las dos palmas |
+| 3 | 9789584295125 | Cien años de soledad |
+| 4 | 9789587047462 | Delirio |
+| 5 | 9789587434477 | Satanás |
+| 6 | 9789588886121 | La vorágine |
+| 7 | 9789588948485 | Los ejércitos |
+
+**Traza — ISBN existente: `9789587047462` (Delirio)**
+| Paso | inicio | fin | medio | ISBN en medio | Decisión |
+|---:|---:|---:|---:|---|---|
+| 1 | 0 | 7 | 3 | 9789584295125 | medio < buscado -> inicio = medio + 1 |
+| 2 | 4 | 7 | 5 | 9789587434477 | medio > buscado -> fin = medio - 1 |
+| 3 | 4 | 4 | 4 | 9789587047462 | encontrado |
+
+Resultado: `Delirio`, **comparaciones: 3**.
+
+**Traza — ISBN inexistente: `9789585000000`**
+| Paso | inicio | fin | medio | ISBN en medio | Decisión |
+|---:|---:|---:|---:|---|---|
+| 1 | 0 | 7 | 3 | 9789584295125 | medio < buscado -> inicio = medio + 1 |
+| 2 | 4 | 7 | 5 | 9789587434477 | medio > buscado -> fin = medio - 1 |
+| 3 | 4 | 4 | 4 | 9789587047462 | medio > buscado -> fin = medio - 1 |
+| 4 | 4 | 3 | -1 | - | inicio > fin -> no encontrado |
+
+Resultado: `null`, **comparaciones: 3**.
+
+#### Comparación búsqueda lineal vs binaria (ISBN inexistente, peor caso lineal)
+Medición con `node src/comparacionBinaria.js` (catálogos generados y ordenados por ISBN):
+
+| Tamaño (n) | Lineal (comparaciones) | Binaria (comparaciones) | Máx teórico binaria ⌊log₂(n)⌋+1 | log₂(n) |
+|---:|---:|---:|---:|---:|
+| 1.000 | 1.000 | 9 | 10 | 9.9658 |
+| 10.000 | 10.000 | 13 | 14 | 13.2877 |
+| 1.000.000 | 1.000.000 | 19 | 20 | 19.9316 |
+
+La búsqueda binaria crece logarítmicamente: con 1.000.000 de libros no supera **20 comparaciones** (máximo teórico ⌊log₂(1.000.000)⌋+1 = 20), frente a 1.000.000 de la lineal en el peor caso.
+
+#### Demostración: búsqueda binaria en catálogo SIN ordenar
+**Caso:** buscar `9789584264879` (Rosario Tijeras), presente en el índice 4 de la **muestra original** (no ordenada por ISBN).
+
+Muestra original (sin ordenar por ISBN):
+| Índice | ISBN | Título |
+|---:|---|---|
+| 0 | 9789584295125 | Cien años de soledad |
+| 1 | 9789588886121 | La vorágine |
+| 2 | 9789584270344 | El olvido que seremos |
+| 3 | 9789587047462 | Delirio |
+| 4 | 9789584264879 | Rosario Tijeras |
+| 5 | 9789588948485 | Los ejércitos |
+| 6 | 9789584276049 | La casa de las dos palmas |
+| 7 | 9789587434477 | Satanás |
+
+Pasos de la búsqueda binaria aplicada al arreglo **no ordenado**:
+| Paso | inicio | fin | medio | ISBN en medio | Decisión |
+|---:|---:|---:|---:|---|---|
+| 1 | 0 | 7 | 3 | 9789587047462 | medio > buscado -> fin = medio - 1 |
+| 2 | 0 | 2 | 1 | 9789588886121 | medio > buscado -> fin = medio - 1 |
+| 3 | 0 | 0 | 0 | 9789584295125 | medio > buscado -> fin = medio - 1 |
+| 4 | 0 | -1 | -1 | - | inicio > fin -> no encontrado |
+
+**Resultado:** `null` en 3 comparaciones, aunque el libro **sí existe** (la búsqueda lineal lo encuentra en 5 comparaciones).
+
+**Explicación:** la búsqueda binaria asume que el arreglo está ordenado y descarta la mitad donde el elemento “no puede estar” según la comparación con el medio. Como los ISBN no están en orden, la comparación del medio (p. ej. `9789587047462 > 9789584264879`) lleva a descartar la mitad derecha —justo donde estaba el ISBN buscado (índice 4)— produciendo un resultado incorrecto (falso negativo). Por ello, la búsqueda binaria **exige datos ordenados** por la clave de búsqueda.
