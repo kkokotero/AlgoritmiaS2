@@ -216,4 +216,151 @@ function mergeSort(arreglo, comparar) {
 
 const comparadores = require("./comparadores");
 
-module.exports = { bubbleSort, selectionSort, insertionSort, mezclar, mergeSort, ...comparadores };
+module.exports = {
+  bubbleSort,
+  selectionSort,
+  insertionSort,
+  mezclar,
+  mergeSort,
+  particion,
+  quickSort,
+  quickSortAleatorio,
+  ...comparadores,
+};
+
+/**
+ * Partición de Lomuto: pivote = último elemento (arreglo[fin]).
+ * Reordena en el lugar y devuelve el índice final del pivote.
+ * @template T
+ * @param {T[]} arreglo
+ * @param {number} inicio
+ * @param {number} fin
+ * @param {(a:T,b:T)=>number} comparar
+ * @param {{comparaciones:number, intercambios:number}} contadores
+ * @returns {number}
+ */
+function particion(arreglo, inicio, fin, comparar, contadores) {
+  const pivote = arreglo[fin];
+  let i = inicio - 1;
+  for (let j = inicio; j < fin; j++) {
+    contadores.comparaciones++;
+    if (comparar(arreglo[j], pivote) <= 0) {
+      i++;
+      if (i !== j) {
+        const temp = arreglo[i];
+        arreglo[i] = arreglo[j];
+        arreglo[j] = temp;
+        contadores.intercambios++;
+      }
+    }
+  }
+  const posPivote = i + 1;
+  if (posPivote !== fin) {
+    const temp = arreglo[posPivote];
+    arreglo[posPivote] = arreglo[fin];
+    arreglo[fin] = temp;
+    contadores.intercambios++;
+  }
+  return posPivote;
+}
+
+/**
+ * Quick Sort recursivo (pivote fijo: último elemento). Recurre en el lado menor
+ * e itera en el mayor para limitar la profundidad de pila a O(log n).
+ * @template T
+ * @param {T[]} arreglo
+ * @param {number} inicio
+ * @param {number} fin
+ * @param {(a:T,b:T)=>number} comparar
+ * @param {{comparaciones:number, intercambios:number}} contadores
+ */
+function quickSortRec(arreglo, inicio, fin, comparar, contadores) {
+  let lo = inicio;
+  let hi = fin;
+  while (lo < hi) {
+    const p = particion(arreglo, lo, hi, comparar, contadores);
+    // Recurse on smaller partition, iterate on larger
+    if (p - lo < hi - p) {
+      quickSortRec(arreglo, lo, p - 1, comparar, contadores);
+      lo = p + 1;
+    } else {
+      quickSortRec(arreglo, p + 1, hi, comparar, contadores);
+      hi = p - 1;
+    }
+  }
+}
+
+/**
+ * Quick Sort con pivote fijo (último elemento). Trabaja sobre una copia.
+ * @template T
+ * @param {T[]} arreglo
+ * @param {(a:T,b:T)=>number} comparar
+ * @returns {{arreglo:T[], comparaciones:number, intercambios:number, desplazamientos:number, pasadas:number}}
+ */
+function quickSort(arreglo, comparar) {
+  const arr = arreglo.slice();
+  const contadores = { comparaciones: 0, intercambios: 0 };
+  if (arr.length > 1) {
+    quickSortRec(arr, 0, arr.length - 1, comparar, contadores);
+  }
+  return {
+    arreglo: arr,
+    comparaciones: contadores.comparaciones,
+    intercambios: contadores.intercambios,
+    desplazamientos: 0,
+    pasadas: 0,
+  };
+}
+
+/**
+ * Quick Sort recursivo con pivote aleatorio.
+ * @template T
+ * @param {T[]} arreglo
+ * @param {number} inicio
+ * @param {number} fin
+ * @param {(a:T,b:T)=>number} comparar
+ * @param {{comparaciones:number, intercambios:number}} contadores
+ */
+function quickSortAleatorioRec(arreglo, inicio, fin, comparar, contadores) {
+  let lo = inicio;
+  let hi = fin;
+  while (lo < hi) {
+    const aleatorio = lo + Math.floor(Math.random() * (hi - lo + 1));
+    if (aleatorio !== hi) {
+      const tmp = arreglo[aleatorio];
+      arreglo[aleatorio] = arreglo[hi];
+      arreglo[hi] = tmp;
+      contadores.intercambios++;
+    }
+    const p = particion(arreglo, lo, hi, comparar, contadores);
+    if (p - lo < hi - p) {
+      quickSortAleatorioRec(arreglo, lo, p - 1, comparar, contadores);
+      lo = p + 1;
+    } else {
+      quickSortAleatorioRec(arreglo, p + 1, hi, comparar, contadores);
+      hi = p - 1;
+    }
+  }
+}
+
+/**
+ * Quick Sort con pivote aleatorio. Trabaja sobre una copia.
+ * @template T
+ * @param {T[]} arreglo
+ * @param {(a:T,b:T)=>number} comparar
+ * @returns {{arreglo:T[], comparaciones:number, intercambios:number, desplazamientos:number, pasadas:number}}
+ */
+function quickSortAleatorio(arreglo, comparar) {
+  const arr = arreglo.slice();
+  const contadores = { comparaciones: 0, intercambios: 0 };
+  if (arr.length > 1) {
+    quickSortAleatorioRec(arr, 0, arr.length - 1, comparar, contadores);
+  }
+  return {
+    arreglo: arr,
+    comparaciones: contadores.comparaciones,
+    intercambios: contadores.intercambios,
+    desplazamientos: 0,
+    pasadas: 0,
+  };
+}

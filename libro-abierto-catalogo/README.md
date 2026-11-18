@@ -25,6 +25,7 @@ Algoritmos en `src/ordenamiento.js` (misma firma `(arreglo, comparar, { traza })
 - **Selection Sort** (v0.2): búsqueda del mínimo e intercambio (comparaciones constantes n·(n-1)/2, mínimo de intercambios, **inestable**).
 - **Insertion Sort** (v0.2): inserción por desplazamiento (**estable**, aprovecha datos ordenados/casi ordenados).
 - **Merge Sort** (v0.3): recursivo y **estable** (`mezclar` con dos índices, sin `sort`, `slice` para dividir). Complejidad garantizada **O(n log n)** y memoria adicional **O(n)**.
+- **Quick Sort** (v0.3): partición **en el lugar** (Lomuto) y recursión con índices, sobre copia. `quickSort` usa pivote fijo (último elemento, peor caso O(n²) con datos ordenados, **inestable**); `quickSortAleatorio` usa pivote aleatorio para evitar el caso patológico (~O(n log n) en promedio).
 
 Comparadores en `src/comparadores.js` (también reexportados desde `ordenamiento.js`):
 - `porAutorYTitulo` (autor y luego título, `localeCompare("es",{sensitivity:"base"})`, ignora mayúsculas/tildes)
@@ -34,19 +35,22 @@ Comparadores en `src/comparadores.js` (también reexportados desde `ordenamiento
 Generación de datos: `generarCatalogo(n, { copiasRepetidas })` y `casiOrdenado(n, cambios)` en `src/generador.js`.
 
 ## Laboratorio de rendimiento
-`src/laboratorio.js` ejecuta Bubble, Selection, Insertion, Merge Sort y `sort` nativo (referencia) con **500, 1.000, 2.000 y 4.000** libros en estados **aleatorio, ordenado, invertido y casi ordenado**, mostrando con `console.table` comparaciones, intercambios y tiempo. Verifica automáticamente que cada resultado esté ordenado (marca **FALLA** si no) e incluye resumen del crecimiento del tiempo al duplicar `n`.
+`src/laboratorio.js` ejecuta Bubble, Selection, Insertion, Merge Sort, Quick Sort (pivote fijo y aleatorio) y `sort` nativo (referencia) con **500, 1.000, 2.000 y 4.000** libros en estados **aleatorio, ordenado, invertido y casi ordenado**, mostrando con `console.table` comparaciones, intercambios y tiempo. Verifica automáticamente que cada resultado esté ordenado (marca **FALLA** si no) e incluye resumen del crecimiento del tiempo al duplicar `n`.
 
 ## Cómo ejecutarlo
 Desde la carpeta `libro-abierto-catalogo/`:
 
 ```bash
-# v0.3: laboratorio de ordenamiento (incluye Merge Sort, tabla + verificación + crecimiento)
+# v0.3: laboratorio de ordenamiento (Merge/Quick, tabla + verificación + crecimiento)
 node src/laboratorio.js
 # o
 npm run laboratorio
 
 # Merge Sort: mezclar, árbol de divisiones/mezclas, comparaciones vs n·log2(n), estabilidad y tiempos
 npm run merge
+
+# Quick Sort: traza de partición, mediciones 10k (aleatorio/ordenado), pivote aleatorio, estabilidad y comparación
+npm run quick
 
 # Trazas y mediciones de ordenamiento (Bubble/Selection/Insertion)
 npm run ordenamiento
@@ -63,7 +67,7 @@ npm run busqueda
 npm run binaria
 ```
 
-**Salida esperada (`laboratorio.js`):** tabla de resultados por (n, estado, algoritmo) con comparaciones, intercambios, tiempo y verificación (OK/FALLA) sin errores, tabla de crecimiento al duplicar `n` y mensaje de verificación automática. **Salida esperada (`merge`):** prueba de `mezclar`, árbol de ejecución de Merge Sort, tabla comparaciones vs `n·log2(n)`, experimento de estabilidad y comparación de tiempos con 4.000 libros.
+**Salida esperada (`laboratorio.js`):** tabla por (n, estado, algoritmo) con comparaciones, intercambios, tiempo y verificación (OK/FALLA) sin errores, crecimiento al duplicar `n` y verificación automática. **`merge`:** prueba de `mezclar`, árbol de Merge Sort, comparaciones vs `n·log2(n)`, estabilidad y tiempos. **`quick`:** traza de la primera partición, mediciones 10.000 (aleatorio/ordenado) y análisis del pivote, versión con pivote aleatorio, estabilidad y comparación Merge vs Quick.
 
 ## Estructura
 ```
@@ -77,11 +81,12 @@ libro-abierto-catalogo/
 │   ├── busquedaBinaria.js     # Búsqueda binaria y primera ocurrencia
 │   ├── comparacionBinaria.js  # Comparación lineal vs binaria
 │   ├── catalogo.js            # Buscador integrado v0.1
-│   ├── ordenamiento.js        # Bubble, Selection, Insertion, Merge (+ comparadores)
+│   ├── ordenamiento.js        # Bubble, Selection, Insertion, Merge, Quick (+ comparadores)
 │   ├── comparadores.js        # Comparadores compuestos e invertir
 │   ├── medirOrdenamiento.js   # Trazas y tabla comparativa (cuadráticos)
 │   ├── medirEstabilidad.js    # Experimento de estabilidad
 │   ├── medirMergeSort.js      # Trazas, árbol y mediciones de Merge Sort
+│   ├── medirQuickSort.js      # Trazas, mediciones y análisis de Quick Sort
 │   └── laboratorio.js         # Laboratorio de rendimiento
 ├── bitacora.md
 ├── jsconfig.json
