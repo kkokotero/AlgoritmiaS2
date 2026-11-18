@@ -52,6 +52,12 @@ npm run merge
 # Quick Sort: traza de partición, mediciones 10k (aleatorio/ordenado), pivote aleatorio, estabilidad y comparación
 npm run quick
 
+# Top-K: ranking de más prestados (Merge Sort vs selección parcial) y comparación k=10/k=5000
+npm run topk
+
+# Autocompletar por prefijo (búsqueda binaria de límite inferior) y casos de prueba
+npm run autocompletar
+
 # Trazas y mediciones de ordenamiento (Bubble/Selection/Insertion)
 npm run ordenamiento
 
@@ -67,7 +73,7 @@ npm run busqueda
 npm run binaria
 ```
 
-**Salida esperada (`laboratorio.js`):** tabla por (n, estado, algoritmo) con comparaciones, intercambios, tiempo y verificación (OK/FALLA) sin errores, crecimiento al duplicar `n` y verificación automática. **`merge`:** prueba de `mezclar`, árbol de Merge Sort, comparaciones vs `n·log2(n)`, estabilidad y tiempos. **`quick`:** traza de la primera partición, mediciones 10.000 (aleatorio/ordenado) y análisis del pivote, versión con pivote aleatorio, estabilidad y comparación Merge vs Quick.
+**Salida esperada (`laboratorio.js`):** tabla por (n, estado, algoritmo) con comparaciones, intercambios, tiempo y verificación (OK/FALLA) sin errores, crecimiento al duplicar `n` y verificación automática. **`merge`:** prueba de `mezclar`, árbol de Merge Sort, comparaciones vs `n·log2(n)`, estabilidad y tiempos. **`quick`:** traza de la primera partición, mediciones 10.000 (aleatorio/ordenado), análisis del pivote, versión con pivote aleatorio, estabilidad y comparación Merge vs Quick. **`topk`:** top 10 más prestados y comparación de estrategias (O(n log n) vs O(k·n)) con mediciones para k=10 y k=5000 sobre 10.000 libros. **`autocompletar`:** catálogo ordenado por título (normalizado) y pruebas con prefijo frecuente, único resultado, sin resultados y cadena vacía (con casos borde documentados).
 
 ## Estructura
 ```
@@ -87,6 +93,10 @@ libro-abierto-catalogo/
 │   ├── medirEstabilidad.js    # Experimento de estabilidad
 │   ├── medirMergeSort.js      # Trazas, árbol y mediciones de Merge Sort
 │   ├── medirQuickSort.js      # Trazas, mediciones y análisis de Quick Sort
+│   ├── topk.js                # Top-K: ordenamiento completo y selección parcial
+│   ├── medirTopK.js           # Comparación de estrategias Top-K
+│   ├── autocompletar.js       # Búsqueda por prefijo (lower bound) y autocompletar
+│   ├── probarAutocompletar.js # Pruebas y casos borde de autocompletar
 │   └── laboratorio.js         # Laboratorio de rendimiento
 ├── bitacora.md
 ├── jsconfig.json

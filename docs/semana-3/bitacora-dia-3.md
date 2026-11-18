@@ -177,3 +177,58 @@ Resultado con **Quick Sort** (pivote fijo): Laura (Delirio, Dulce compañía, La
 
 ### 6. Laboratorio (ambas versiones agregadas)
 `src/laboratorio.js` ejecuta Bubble, Selection, Insertion, Merge Sort, **Quick Sort (pivote fijo)**, **Quick Sort (pivote aleatorio)** y `sort` nativo con 500–4000 libros en 4 estados. Verificación automática: **sin FALLA**. En datos ordenados se observa el crecimiento cuadrático del pivote fijo (124.750 → 499.500 → 1.999.000 → 7.998.000 comparaciones, ~×4 al duplicar n) mientras el pivote aleatorio se mantiene en ~n log n; en datos aleatorios ambas versiones de Quick son eficientes.
+
+---
+
+## Día 3 (cierre): Top-K y autocompletar por prefijo
+
+### 1. Top-K: ranking de los libros más prestados
+
+**Implementación (`src/topk.js`):**
+- `topPrestados(libros, k)`: ordena una **copia** con **Merge Sort** usando `porPrestamosDesc` (de mayor a menor) y toma los primeros `k`. Devuelve `{ resultado, comparaciones }`.
+- `topPrestadosSeleccion(libros, k)`: alternativa por **selección parcial** — realiza `k` pasadas buscando el máximo restante (similar a k pasos de Selection Sort) intercambiando a la posición `i`. Devuelve `{ resultado, comparaciones }`.
+
+**Ejemplo:** `topPrestados(libros, 10)` devuelve 10 libros ordenados de mayor a menor número de préstamos (ej. top-1 con 500 préstamos), verificado en `src/medirTopK.js`.
+
+**Comparación de estrategias (n = 10.000 libros, `npm run topk`):**
+
+| k | Estrategia | Comparaciones | Tiempo (ms) | Top-1 (préstamos) | ¿Top-k válido desc? |
+|---:|---|---:|---:|---:|:---:|
+| 10 | Merge Sort completo + top k (O(n log n)) | 120.466 | 7.199 | 500 | Sí |
+| 10 | Selección parcial k pasadas (O(k·n)) | 99.945 | 2.658 | 500 | Sí |
+| 5.000 | Merge Sort completo + top k (O(n log n)) | 120.466 | 2.026 | 500 | Sí |
+| 5.000 | Selección parcial k pasadas (O(k·n)) | 37.497.500 | 56.273 | 500 | Sí |
+
+(n·log₂(n) ≈ 132.877,12)
+
+**Análisis Big O y cuándo conviene cada una:**
+- **`topPrestados` (ordenar completo + cortar):** **O(n log n)** tiempo y **O(n)** memoria adicional. El costo es prácticamente independiente de `k` (solo cambia el `slice`). Conviene cuando `k` es grande o del orden de `n` (p. ej. k=5.000, la selección parcial hace ~37.5M comparaciones vs ~120k del ordenamiento).
+- **`topPrestadosSeleccion` (k pasadas, máximo restante):** **O(k·n)** comparaciones y O(1) memoria auxiliar extra (además de la copia). Conviene cuando `k` es muy pequeño respecto a `n` (k ≪ log₂(n)), pues solo se realizan k barridos parciales (p. ej. k=10 ⇒ 99.945 comparaciones, menor que n·log₂(n) y más rápido en la medición).
+
+**Conclusión:** para el ranking de los 10 más prestados (k pequeño) la selección parcial es competitiva/más barata; para obtener muchos elementos (k grande) es preferible ordenar una vez con Merge Sort.
+
+### 2. Autocompletar por prefijo de título
+
+**Implementación (`src/autocompletar.js`):**
+- `normalizarTitulo(texto)`: normaliza para comparar/buscar sin distinguir mayúsculas ni tildes (`normalize("NFD")`, elimina diacríticos, `toLowerCase`, `trim`).
+- `ordenarPorTitulo(libros)`: copia ordenada por título normalizado usando **Merge Sort** y comparador `porTituloNormalizado`.
+- `primeraPosicionPrefijo(librosOrdenadosPorTitulo, prefijo)`: **búsqueda binaria de límite inferior (lower bound)** sobre títulos normalizados; devuelve la primera posición cuyo título es **mayor o igual** que el prefijo normalizado (posición de inserción/primer posible match). No recorre el catálogo completo.
+- `autocompletar(librosOrdenadosPorTitulo, prefijo, max)`: desde `primeraPosicionPrefijo` devuelve hasta `max` títulos cuyo título normalizado **empieza con** el prefijo (`startsWith`). Al estar ordenados, al encontrar un título que ya no coincide se detiene (coincidencias contiguas).
+
+**Pruebas (`npm run autocompletar`, dataset con mayúsculas/tildes):** catálogo ordenado por título normalizado: `["Cien años de soledad", "El amor en los tiempos del cólera", "La casa grande", "La hojarasca", "La vorágine", "Lágrimas en la lluvia", "Pedro Páramo", "Rayuela"]`.
+
+| Caso | Prefijo | primeraPosicionPrefijo | Revisados | Sugerencias | Comportamiento documentado |
+|---|---|---:|---:|---:|---|
+| 1. Frecuente | `"la"` | 2 | 5 | 4: "La casa grande", "La hojarasca", "La vorágine", "Lágrimas en la lluvia" | Devuelve todos los que empiezan por "la"/"lá" sin distinguir mayúsculas/tildes; recorre solo coincidencias contiguas. |
+| 2. Un solo resultado | `"ray"` | 7 | 1 | 1: "Rayuela" | Devuelve el único título y se detiene al siguiente no coincidente. |
+| 3. Sin resultados | `"zzz"` | 8 | 0 | 0 | Posición de inserción al final; ningún título inicia con el prefijo, lista vacía. |
+| 4. Cadena vacía | `""` | 0 | 3 (max) | 3: primeros del catálogo | `""` normaliza a vacío y todo título cumple `startsWith("")`; devuelve hasta `max` desde el inicio. |
+
+**Casos borde:** normalización NFD (sin diacríticos, minúsculas) aplicada a prefijo y títulos; límite inferior + corte al primer no-`startsWith` (contiguidad por orden); sin resultados devuelve vacío sin recorrer todo; cadena vacía acotada por `max`.
+
+**Complejidad justificada:** `primeraPosicionPrefijo` realiza una búsqueda binaria → **O(log n)** comparaciones. `autocompletar` recorre únicamente las `k` coincidencias devueltas (hasta `max`), verificando `startsWith` → **O(k)**. Total **O(log n + k)**, sin recorrer el catálogo completo (ej.: prefijo "ray" revisa 1 de 8 elementos, no 8).
+
+### 3. Archivos relevantes
+- `src/topk.js`, `src/medirTopK.js` (Top-K y comparación O(n log n) vs O(k·n))
+- `src/autocompletar.js`, `src/probarAutocompletar.js` (orden por título normalizado, lower bound, autocompletar y pruebas)
+- `src/ordenamiento.js` (`mergeSort`, `porPrestamosDesc`), `src/comparadores.js`

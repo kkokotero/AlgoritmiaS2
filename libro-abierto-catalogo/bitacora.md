@@ -17,6 +17,7 @@ Las bitácoras detalladas se registran en `docs/` organizada por semana y día:
 - **Laboratorio:** `src/laboratorio.js` (500–4000, 4 estados, + `sort` nativo, verificación y crecimiento) y recomendaciones.
 
 ## Día 3
-- **Merge Sort:** `mezclar` (dos índices, sin `sort`) y `mergeSort` recursivo (`slice`, divide/mezcla) con contadores. Árbol sobre `[2006,1967,2004,1924,1999,2007,1988,2002]`; comparaciones < `n·log₂(n)` para 1.000, 10.000 y 100.000; estable (MiniReto 7).
-- **Quick Sort:** `particion` Lomuto (pivote = último, en el lugar) y `quickSort`/`quickSortAleatorio` sobre copia. Traza de 1ª partición; 10.000 aleatorios vs ordenados muestra O(n²) con pivote fijo (particiones desbalanceadas, riesgo de desbordamiento de pila) y corrección a ~O(n log n) con pivote aleatorio; **inestable** (MiniReto 7).
-- **Comparación y laboratorio:** tabla Merge Sort vs Quick Sort (mejor/promedio/peor, memoria, estabilidad); ambas versiones en `src/laboratorio.js` con verificación automática.
+- **Merge Sort:** `mezclar` y `mergeSort` recursivo con contadores. Árbol sobre `[2006,1967,2004,1924,1999,2007,1988,2002]`; comparaciones < `n·log₂(n)` para 1.000, 10.000 y 100.000; estable (MiniReto 7).
+- **Quick Sort:** `particion` Lomuto (pivote último) y `quickSort`/`quickSortAleatorio`. Traza 1ª partición; 10.000 aleatorios vs ordenados evidencia O(n²) con pivote fijo y corrección con pivote aleatorio (~O(n log n)); inestable. Comparación Merge vs Quick en bitácora.
+- **Laboratorio:** Bubble/Selection/Insertion/Merge/Quick fijo/Quick aleatorio/`sort` nativo (500–4000, 4 estados) con verificación automática OK/FALLA.
+- **Top-K y autocompletar:** `topPrestados` (Merge Sort, O(n log n)) vs `topPrestadosSeleccion` (k pasadas, O(k·n)) comparados con k=10 y k=5000 sobre 10.000; `ordenarPorTitulo`, `primeraPosicionPrefijo` (lower bound) y `autocompletar` (O(log n + k), normalización sin mayúsculas/tildes) con casos frecuente/único/sin resultados/cadena vacía.

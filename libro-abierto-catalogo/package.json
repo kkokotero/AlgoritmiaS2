@@ -11,6 +11,8 @@
     "estabilidad": "node src/medirEstabilidad.js",
     "merge": "node src/medirMergeSort.js",
     "quick": "node src/medirQuickSort.js",
+    "topk": "node src/medirTopK.js",
+    "autocompletar": "node src/probarAutocompletar.js",
     "laboratorio": "node src/laboratorio.js",
     "catalogo": "node src/catalogo.js",
     "start": "node src/catalogo.js"
