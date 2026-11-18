@@ -116,9 +116,39 @@ function buscarPorIsbnConTraza(librosOrdenados, isbn) {
   return { libro: null, comparaciones, pasos };
 }
 
+/**
+ * Búsqueda binaria de la primera ocurrencia de un ISBN (lower bound).
+ * @param {Libro[]} librosOrdenados - Catálogo ordenado por ISBN.
+ * @param {string} isbn - ISBN a buscar.
+ * @returns {{posicion: number, comparaciones: number}} Índice de la primera copia o -1.
+ */
+function primeraPosicionIsbn(librosOrdenados, isbn) {
+  let inicio = 0;
+  let fin = librosOrdenados.length - 1;
+  let resultado = -1;
+  let comparaciones = 0;
+
+  while (inicio <= fin) {
+    const medio = Math.floor((inicio + fin) / 2);
+    comparaciones++;
+    const cmp = librosOrdenados[medio].isbn.localeCompare(isbn);
+    if (cmp === 0) {
+      resultado = medio;
+      fin = medio - 1; // continuar a la izquierda para hallar la primera
+    } else if (cmp < 0) {
+      inicio = medio + 1;
+    } else {
+      fin = medio - 1;
+    }
+  }
+
+  return { posicion: resultado, comparaciones };
+}
+
 module.exports = {
   ordenarPorIsbn,
   buscarPorIsbn,
   buscarPorIsbnRecursivo,
   buscarPorIsbnConTraza,
+  primeraPosicionIsbn,
 };

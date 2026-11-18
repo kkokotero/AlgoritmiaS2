@@ -65,16 +65,19 @@ function generarAutor() {
 }
 
 /**
- * Genera un catálogo de n libros con ISBN únicos.
- * @param {number} n - Cantidad de libros a generar.
+ * Genera un catálogo de n libros. Permite insertar copias repetidas del mismo ISBN.
+ * @param {number} n - Cantidad total de libros a generar.
+ * @param {{copiasRepetidas?: number}} [opciones] - Opciones del generador.
  * @returns {{isbn: string, titulo: string, autor: string, anio: number, prestamos: number}[]} Catálogo generado.
  */
-function generarCatalogo(n) {
+function generarCatalogo(n, opciones = {}) {
+  const { copiasRepetidas = 0 } = opciones;
+  const cantidadBase = Math.max(0, n - copiasRepetidas);
   /** @type {{isbn: string, titulo: string, autor: string, anio: number, prestamos: number}[]} */
   const catalogo = [];
   const isbnsUsados = new Set();
 
-  while (catalogo.length < n) {
+  while (catalogo.length < cantidadBase) {
     const isbn = generarIsbn();
     if (isbnsUsados.has(isbn)) {
       continue;
@@ -87,6 +90,19 @@ function generarCatalogo(n) {
       anio: aleatorioEntero(1900, 2026),
       prestamos: aleatorioEntero(0, 500),
     });
+  }
+
+  if (copiasRepetidas > 0 && catalogo.length > 0) {
+    const original = catalogo[aleatorioEntero(0, catalogo.length - 1)];
+    for (let i = 0; i < copiasRepetidas; i++) {
+      catalogo.push({
+        isbn: original.isbn,
+        titulo: original.titulo,
+        autor: original.autor,
+        anio: original.anio,
+        prestamos: aleatorioEntero(0, 500),
+      });
+    }
   }
 
   return catalogo;

@@ -169,3 +169,29 @@ Pasos de la búsqueda binaria aplicada al arreglo **no ordenado**:
 **Resultado:** `null` en 3 comparaciones, aunque el libro **sí existe** (la búsqueda lineal lo encuentra en 5 comparaciones).
 
 **Explicación:** la búsqueda binaria asume que el arreglo está ordenado y descarta la mitad donde el elemento “no puede estar” según la comparación con el medio. Como los ISBN no están en orden, la comparación del medio (p. ej. `9789587047462 > 9789584264879`) lleva a descartar la mitad derecha —justo donde estaba el ISBN buscado (índice 4)— produciendo un resultado incorrecto (falso negativo). Por ello, la búsqueda binaria **exige datos ordenados** por la clave de búsqueda.
+
+---
+
+### Día 1 (integración): Buscador v0.1 y casos borde
+
+#### Integración (`src/catalogo.js`)
+- Genera **10.000 libros** (con opción de copias repetidas del mismo ISBN) y prepara una **copia ordenada por ISBN** (`localeCompare`).
+- Ofrece consultas por **título**, **autor**, **palabra** e **ISBN**, ejecutando el algoritmo adecuado según el campo y si existe orden.
+- Muestra un **reporte de consultas de ejemplo** indicando, para cada una: consulta, **algoritmo usado**, **comparaciones** y **resultado** (`node src/catalogo.js` / `npm run catalogo`).
+
+#### Copias repetidas del mismo ISBN y primera ocurrencia
+- `generador.js` acepta `generarCatalogo(n, { copiasRepetidas })` para insertar copias con el mismo ISBN (simulando el mismo libro en distintas sedes), consecutivas al quedar ordenado por ISBN.
+- `primeraPosicionIsbn(librosOrdenados, isbn)` (`src/busquedaBinaria.js`): variante de búsqueda binaria (lower bound) que, al encontrar el ISBN, sigue buscando a la izquierda (`fin = medio - 1`) y devuelve la **primera posición** y sus comparaciones. Luego se cuentan las copias recorriendo hacia la derecha mientras el ISBN sea igual.
+- **Prueba en reporte:** la búsqueda binaria normal encuentra una de las copias y `primeraPosicionIsbn` devuelve la primera posición con el conteo total de copias (ej.: 4 copias, primera posición identificada y conteo correcto).
+
+#### Tabla de decisión: algoritmo por tipo de consulta
+| Tipo de consulta | ¿Datos ordenados por ese campo? | Algoritmo elegido | Complejidad (tiempo) |
+|---|---|---|---|
+| Título (coincidencia exacta, primera) | No (catálogo original) | Búsqueda lineal con retorno temprano (`buscarPorTitulo`) | Mejor O(1), promedio/peor O(n) |
+| Autor (todas las coincidencias) | No | Búsqueda lineal, recorrido completo (`buscarPorAutor`) | Siempre O(n) |
+| Palabra en título (todas las que contienen) | No | Búsqueda lineal, recorrido completo (`buscarPorPalabra`) | Siempre O(n) |
+| ISBN (cualquier copia) | Sí (copia ordenada por ISBN) | Búsqueda binaria iterativa/recursiva (`buscarPorIsbn`) | O(log n) |
+| ISBN (primera copia entre repetidos) | Sí (copias consecutivas por ISBN) | Búsqueda binaria de primera ocurrencia/lower bound + conteo a la derecha (`primeraPosicionIsbn`) | O(log n + k), k = nº de copias |
+| Cualquier campo sin índice/orden | No | Búsqueda lineal | O(n) |
+
+**Justificación:** la búsqueda lineal no requiere orden y es la opción cuando se busca por campos no ordenados o cuando se deben devolver **todas** las coincidencias (autor/palabra). La búsqueda binaria requiere datos **ordenados por la clave** y reduce drásticamente las comparaciones (O(log n), ≤20 para 1.000.000) para búsquedas por ISBN; para duplicados se usa la variante de primera ocurrencia para ubicar el inicio del bloque y contar k copias contiguas.
