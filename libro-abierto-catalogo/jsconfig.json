@@ -6,7 +6,7 @@
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strict": true,
-    "types": ["node"]
+    "types": ["@types/node"]
   },
   "exclude": [
     "node_modules",
