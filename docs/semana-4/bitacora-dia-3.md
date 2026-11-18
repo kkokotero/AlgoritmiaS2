@@ -238,3 +238,132 @@ Alternativa: mantener top-3 en una pasada O(n+u) o min-heap de tamaño k O(n + u
 
 **Fortaleza:** traza completa que evidencia el recorrido único y la actualización constante de la ventana.  
 **Oportunidad de mejora:** en contexto real, discutir costo práctico de `Math.random`/distribución y, si aplica, estabilidad o criterio de desempate en el top.
+
+---
+
+# Mantenimiento: dependencias, ciclos y orden de ejecución
+
+**Proyecto:** `ruta-paisa-planificador` — `src/GrafoDirigido.js`, `src/mantenimiento.js`, comando `node src/planificador.js --mantenimiento`
+
+## Contexto
+El equipo de mantenimiento planea las obras del próximo mes. Algunas tareas dependen de otras (no se puede probar la señalización antes de cambiar los rieles). Sospechan que el plan tiene un error porque nadie logra decidir por dónde empezar.
+
+**Plan original:**
+
+| Tarea | Descripción                         | Requiere terminar antes |
+|-------|-------------------------------------|-------------------------|
+| T1    | Cerrar el tramo Caribe–Universidad  | —                       |
+| T2    | Cambiar rieles del tramo            | T1                      |
+| T3    | Actualizar el software de señalización | T5                   |
+| T4    | Probar la señalización              | T2, T3                  |
+| T5    | Instalar sensores nuevos            | T4                      |
+| T6    | Reabrir el tramo                    | T4                      |
+
+## Grafo dirigido del plan original (dibujo)
+Se modelan dependencias como **grafo dirigido**: una flecha de cada tarea requerida hacia la tarea que la necesita (arista `requerida → dependiente`).
+
+Aristas: `T1→T2`, `T2→T4`, `T5→T3`, `T3→T4`, `T4→T5`, `T4→T6`.
+
+```
+Plan original (arista: requisito -> tarea dependiente)
+
+        T1
+         │
+         ▼
+        T2 ────────────┐
+                       ▼
+   ┌───── T5 ◄─────── T4 ──────► T6
+   │                   ▲
+   │                   │
+   └─────► T3 ─────────┘
+
+Ciclo dirigido detectado: T3 → T4 → T5 → T3
+  (T3 necesita T5, T5 necesita T4, T4 necesita T3: ninguna puede iniciar)
+```
+
+Lectura del ciclo:
+- `T3` requiere `T5`  ⇒ arista `T5 → T3` (y T3 depende de T5)
+- `T4` requiere `T3`  ⇒ arista `T3 → T4`
+- `T5` requiere `T4`  ⇒ arista `T4 → T5`
+Por tanto existe el ciclo `T3 → T4 → T5 → T3` en el grafo de dependencias.
+
+## Modelado e implementación
+
+### Grafo dirigido (`src/GrafoDirigido.js`)
+- **Lista de adyacencia** `Map<id, vecinos[]>` con conexiones en **un solo sentido** (`agregarArista(desde,hasta)`, sin duplicar aristas). Vértices = tareas, aristas = dependencias `requerida → dependiente`.
+
+### Detección de ciclos — `tieneCiclo()` (DFS con tres estados)
+DFS con tres estados por tarea:
+- `sin_visitar`: no explorada.
+- `en_proceso`: en la pila/recursión actual (ancestro en el camino DFS).
+- `terminada`: todos sus sucesores ya fueron explorados.
+
+Si durante el recorrido se alcanza un vértice en estado **`en_proceso`**, se encontró una arista de retorno y existe un **ciclo**. La función devuelve `{ hayCiclo, ciclo }` donde `ciclo` es el arreglo de tareas que forman el ciclo (reconstruido siguiendo padres), o `null` si no hay ciclo.
+
+### Orden de ejecución — `ordenDeEjecucion()` (ordenamiento topológico)
+Usa el **orden de finalización** del DFS: al terminar de explorar un vértice (pasa a `terminada`) se registra en una pila/lista; el **inverso** de ese orden de finalización es un **orden topológico** válido (cada tarea aparece después de todas sus dependencias/requisitos). Si hay ciclo, no existe orden válido y se informa el error.
+
+### Complejidad
+- **Tiempo:** **O(V + E)** — cada vértice y cada arista se visitan/procesan una vez en el DFS (detección de ciclos y ordenamiento topológico).
+- **Espacio:** **O(V)** — estados, estructura de padres/pila de finalización y pila de recursión en el peor caso.
+
+## Diagnóstico del plan original (`node src/planificador.js --mantenimiento`)
+```
+DIAGNÓSTICO: Se detectó un ciclo de dependencias. No es posible determinar un inicio válido.
+Ciclo detectado: T3 → T4 → T5 → T3
+Tareas involucradas en el ciclo:
+  * T3 - Actualizar el software de señalización
+  * T4 - Probar la señalización
+  * T5 - Instalar sensores nuevos
+```
+Se muestra al equipo de mantenimiento el ciclo que impide iniciar el plan.
+
+## Corrección del plan y justificación
+
+**Propuesta razonable:** `T5` (Instalar sensores nuevos) pasa a requerir `T2` en lugar de `T4`.
+
+| Tarea | Descripción                         | Requiere terminar antes (corregido) |
+|-------|-------------------------------------|-------------------------------------|
+| T1    | Cerrar el tramo Caribe–Universidad  | —                                   |
+| T2    | Cambiar rieles del tramo            | T1                                  |
+| T3    | Actualizar el software de señalización | T5                               |
+| T4    | Probar la señalización              | T2, T3                              |
+| **T5**| **Instalar sensores nuevos**        | **T2** (antes T4)                   |
+| T6    | Reabrir el tramo                    | T4                                  |
+
+**Justificación:** los sensores son componentes físicos sobre la vía, por lo que se instalan después de **cambiar los rieles (T2)** y antes de **actualizar/probar el software de señalización (T3, T4)** que depende de ellos. Esto elimina la dependencia circular `T5 ← T4` (T5 ya no depende de T4) y rompe el ciclo `T3 → T4 → T5 → T3`, manteniendo una secuencia lógica de obra.
+
+**Grafo corregido (sin ciclo):**
+```
+        T1
+         │
+         ▼
+        T2 ────────────┬───────────┐
+         │             ▼           ▼
+         │            T5 ───────► T3
+         │                         │
+         └──────────────┐          ▼
+                        └───────► T4 ──────► T6
+(Aristas: T1→T2, T2→T5, T5→T3, T2→T4, T3→T4, T4→T6)
+```
+
+## Verificación del plan corregido y orden de ejecución
+```
+DIAGNÓSTICO: No se detectaron ciclos. El plan es ejecutable.
+Orden de ejecución válido (ordenamiento topológico, respeta todas las dependencias):
+  1. T1 - Cerrar el tramo Caribe–Universidad
+  2. T2 - Cambiar rieles del tramo
+  3. T5 - Instalar sensores nuevos
+  4. T3 - Actualizar el software de señalización
+  5. T4 - Probar la señalización
+  6. T6 - Reabrir el tramo
+
+Resumen: Plan original CON CICLO (T3 → T4 → T5 → T3).
+         Plan corregido SIN CICLOS. Orden válido: T1 → T2 → T5 → T3 → T4 → T6.
+```
+
+**Validación de dependencias del orden:** T1 sin requisitos; T2 tras T1; T5 tras T2; T3 tras T5; T4 tras T2 y T3; T6 tras T4 → cada tarea aparece después de sus requisitos. ✅
+
+## Integración en el planificador
+- Comando: `node src/planificador.js --mantenimiento` (o `npm run mantenimiento` si se define script).
+- Muestra diagnóstico del plan original (ciclo y tareas), propuesta de corrección justificada, diagnóstico del plan corregido y orden de ejecución válido. Implementación en `src/mantenimiento.js` usando `GrafoDirigido`.

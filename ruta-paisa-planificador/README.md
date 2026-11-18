@@ -21,6 +21,9 @@ node src/planificador.js 10 59 --cerradas 56
 # o
 npm start -- 10 59
 
+# Diagnóstico de mantenimiento: dependencias, detección de ciclos y orden de ejecución
+node src/planificador.js --mantenimiento
+
 # Índice consultable y reporte de consultas (búsquedas, mínimo, máximo, rango, listado)
 node src/indice.js
 
@@ -40,42 +43,11 @@ node src/ArbolBusqueda.js
 node src/recorridos.js
 ```
 
-**Salida esperada (`planificador.js`):** validación de códigos con el índice (mensaje claro si no existen), ruta calculada con BFS mostrando nombres de estaciones, líneas por tramo, **número total de paradas**, **transbordos** (cambio de línea) y, con `--cerradas`, una ruta alternativa o aviso de **viaje imposible**.  
+**Salida esperada (`planificador.js`):** validación de códigos con el índice (mensaje claro si no existen), ruta calculada con BFS mostrando nombres de estaciones, líneas por tramo, **número total de paradas**, **transbordos** (cambio de línea) y, con `--cerradas`, una ruta alternativa o aviso de **viaje imposible**. Con `--mantenimiento` muestra diagnóstico de dependencias, detección del ciclo del plan original y orden topológico del plan corregido.  
 **Salida esperada (`indice.js`):** búsquedas por código, `minimo`/`maximo`, rango zona norte (10–30), listado inorden y análisis de árbol degenerado.  
 **Salida esperada (`red.js`):** V=20, E=21, transbordos y lista de adyacencia. **`cierres.js`:** alcanzabilidad DFS, cierre de Estadio (aisladas Floresta y San Javier) y estaciones críticas.
 
-## Requisitos
-- [Node.js](https://nodejs.org/) >= 18
-- Git
 
-## Cómo ejecutarlo
-Desde la carpeta `ruta-paisa-planificador/`:
-
-```bash
-# v0.1: índice consultable y reporte de consultas (búsquedas, mínimo, máximo, rango, listado)
-node src/indice.js
-# o
-npm start
-
-# Grafo no dirigido de la red (lista de adyacencia, V/E y transbordos)
-node src/red.js
-# o
-npm run grafo
-
-# Árbol general de la red y métricas recursivas
-node src/redArbol.js
-
-# ABB: inserción de las 20 estaciones y búsquedas por código con comparaciones
-node src/ArbolBusqueda.js
-
-# Recorridos (inorden, preorden, postorden), exportación/reconstrucción y métricas
-node src/recorridos.js
-```
-
-**Salida esperada (`indice.js`):** reporte con búsquedas por código (y comparaciones), `minimo()`/`maximo()`, rango de zona norte (10–30), listado completo inorden, métricas del índice y análisis del árbol degenerado al insertar en orden ascendente (altura, comparaciones para San Javier y La Estrella).  
-**Salida esperada (`red.js`):** árbol general con sangría y métricas (`contarNodos`, `contarHojas`, `altura`).  
-**Salida esperada (`ArbolBusqueda.js`):** búsquedas con comparaciones (San Antonio 1, San Javier 7, Niquía 4, Hospital 3, código 33 → `null`).  
-**Salida esperada (`recorridos.js`):** secuencias inorden/preorden/postorden, verificación ascendente, reconstrucción idéntica desde preorden, conteo postorden y altura/hojas (altura 6, 8 hojas, mínima teórica `floor(log2(20))=4`).
 
 ## Consultas soportadas por el índice
 Implementadas en `src/ArbolBusqueda.js` y expuestas en el reporte `src/indice.js`:
@@ -100,9 +72,11 @@ ruta-paisa-planificador/
 │   ├── NodoArbol.js       # Árbol general (valor, hijos, agregarHijo)
 │   ├── redArbol.js        # Construcción de la red como árbol general y funciones recursivas
 │   ├── Grafo.js           # Grafo no dirigido con lista de adyacencia, DFS/BFS y componentes
+│   ├── GrafoDirigido.js   # Grafo dirigido de dependencias: detección de ciclos y orden topológico (DFS)
 │   ├── red.js             # Construcción del grafo de la red (líneas A,B,K,T) con línea por arista
 │   ├── cierres.js         # Análisis de cierres: alcanzabilidad, componentes y estaciones críticas
-│   ├── planificador.js    # Planificador de viajes v0.2 (CLI: ruta, transbordos y cierres)
+│   ├── mantenimiento.js   # Plan de mantenimiento: diagnóstico, ciclo y orden de ejecución
+│   ├── planificador.js    # Planificador de viajes v0.2 (CLI: rutas, cierres y --mantenimiento)
 │   ├── ArbolBusqueda.js   # ABB: NodoBinario, insertar, buscar, recorridos, min/max, rango, métricas
 │   ├── recorridos.js      # Verificación de recorridos y reconstrucción
 │   └── indice.js          # Índice v0.1 y reporte de consultas
@@ -116,5 +90,6 @@ ruta-paisa-planificador/
 Bitácoras detalladas (dibujos, trazas DFS/BFS, análisis y tabla de estructuras) en [`../docs/semana-4/`](../docs/semana-4/):
 - [Día 1: árbol general, ABB, recorridos y consultas](../docs/semana-4/bitacora-dia-1.md)
 - [Día 2: grafo, DFS/componentes, BFS, transbordos y planificador](../docs/semana-4/bitacora-dia-2.md)
+- [Día 3: simulacros (duplicados, demanda) y mantenimiento (ciclos/orden topológico)](../docs/semana-4/bitacora-dia-3.md)
 
 `bitacora.md` en este proyecto actúa como índice/enlace.

@@ -1,12 +1,15 @@
 /**
  * Planificador de viajes Ruta Paisa v0.2.
  * Uso: node src/planificador.js <origen> <destino> [--cerradas cod1,cod2,...]
+ *       node src/planificador.js --mantenimiento
  * Ejemplo: node src/planificador.js 10 59
  *          node src/planificador.js 10 59 --cerradas 56
+ *          node src/planificador.js --mantenimiento
  */
 
 const { construirGrafoRed } = require("./red");
 const { construirIndiceOriginal } = require("./indice");
+const { ejecutarMantenimiento } = require("./mantenimiento");
 
 /**
  * Parsea los argumentos de la terminal.
@@ -101,6 +104,12 @@ function detectarTransbordos(ruta, grafo) {
 }
 
 function main() {
+  const argv = process.argv.slice(2);
+  if (argv.includes("--mantenimiento")) {
+    ejecutarMantenimiento();
+    return;
+  }
+
   const { origen, destino, cerradas, error } = parseArgs(process.argv);
   if (error) {
     console.log(error);
@@ -109,6 +118,7 @@ function main() {
   }
   if (origen === null || destino === null) {
     console.log("Uso: node src/planificador.js <origen> <destino> [--cerradas cod1,cod2,...]");
+    console.log("     node src/planificador.js --mantenimiento");
     process.exitCode = 1;
     return;
   }
